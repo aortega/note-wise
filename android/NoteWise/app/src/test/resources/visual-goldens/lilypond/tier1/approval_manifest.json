@@ -1,0 +1,58 @@
+{
+  "11a-TimeSignatures.xml": {
+    "fixture_xml": "11a-TimeSignatures.xml",
+    "golden_stem": "11a_time_signatures",
+    "status": "rejected",
+    "reference_image": "b2/lily-bf3bc260.png",
+    "reference_size": [
+      634,
+      122
+    ],
+    "approved_golden": null,
+    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/11a_time_signatures_634.new.png",
+    "note": "Rejected by user",
+    "updated_at": "2026-03-08T00:10:02.529674+00:00"
+  },
+  "12aa-Clefs_Pitch_Traditional.xml": {
+    "fixture_xml": "12aa-Clefs_Pitch_Traditional.xml",
+    "golden_stem": "12aa_clefs_pitch_traditional",
+    "status": "rejected",
+    "reference_image": "cb/lily-5ae4bd0d.png",
+    "reference_size": [
+      635,
+      175
+    ],
+    "approved_golden": null,
+    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/12aa_clefs_pitch_traditional_635.new.png",
+    "note": "No good render",
+    "updated_at": "2026-03-08T00:15:34.894472+00:00"
+  },
+  "13a-KeySignatures.xml": {
+    "fixture_xml": "13a-KeySignatures.xml",
+    "golden_stem": "13a_key_signatures",
+    "status": "pending",
+    "reference_image": "05/lily-49426352.png",
+    "reference_size": [
+      635,
+      582
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/13a_key_signatures_635.png",
+    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/13a_key_signatures_635.new.png",
+    "note": "reset",
+    "updated_at": "2026-03-08T06:52:17.490160+00:00"
+  },
+  "01a-Pitches-Pitches.xml": {
+    "fixture_xml": "01a-Pitches-Pitches.xml",
+    "golden_stem": "01a_pitches_pitches",
+    "status": "pending",
+    "reference_image": "c5/lily-7663f27d.png",
+    "reference_size": [
+      635,
+      564
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/01a_pitches_pitches_720.png",
+    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/01a_pitches_pitches_720.new.png",
+    "note": "reset",
+    "updated_at": "2026-03-08T06:52:17.337598+00:00"
+  }
+}

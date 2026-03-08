@@ -1,0 +1,121 @@
+package dev.pola.vexflow.core
+
+import dev.pola.vexflow.elements.VFStave
+import dev.pola.vexflow.model.VFMetrics
+import dev.pola.vexflow.model.VFStaveNote
+import dev.pola.vexflow.model.VFStaveNoteStruct
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
+class VFFormatterTest {
+
+    private fun makeDependencies(): Triple<VFFormatter, VFVoice, VFStave> {
+        val stave = VFStave(0f, 100f, 500f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("4/4").apply { setStave(stave) }
+        return Triple(formatter, voice, stave)
+    }
+
+    private fun quarterNote(key: String) =
+        VFStaveNote(VFStaveNoteStruct(keys = listOf(key), duration = "4", glyphFontScale = 40f))
+
+    @Test
+    fun `four quarter notes get increasing x positions`() {
+        val (formatter, voice, stave) = makeDependencies()
+        val notes = listOf("c/5", "d/5", "e/5", "f/5").map { quarterNote(it) }
+        voice.addTickables(notes)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 50f, justifyWidth = 400f)
+
+        val xs = notes.map { it.x }
+        for (i in 1 until xs.size) {
+            assertTrue(xs[i] > xs[i - 1], "Note $i x=${xs[i]} should be > ${xs[i - 1]}")
+        }
+    }
+
+    @Test
+    fun `first note x is offset from startX for left glyph extents`() {
+        val (formatter, voice, stave) = makeDependencies()
+        val note = quarterNote("c/5")
+        voice.addTickable(note)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 75f, justifyWidth = 300f)
+
+        assertTrue(note.x > 75f)
+    }
+
+    @Test
+    fun `minimum spacing enforced when justifyWidth is 0`() {
+        val (formatter, voice, stave) = makeDependencies()
+        val notes = listOf(quarterNote("c/5"), quarterNote("d/5"))
+        voice.addTickables(notes)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 50f, justifyWidth = 0f)
+
+        val gap = notes[1].x - notes[0].x
+        assertTrue(gap >= 10f, "Gap $gap should be >= minWidth 10f")
+    }
+
+    @Test
+    fun `two voices at same beat share x position`() {
+        val (formatter, _, stave) = makeDependencies()
+        val voice1 = VFVoice("4/4").apply { setStave(stave) }
+        val voice2 = VFVoice("4/4").apply { setStave(stave) }
+        val note1 = quarterNote("e/5").also { voice1.addTickable(it) }
+        val note2 = quarterNote("c/4").also { voice2.addTickable(it) }
+
+        formatter.formatVoices(listOf(voice1, voice2), stave, startX = 50f, justifyWidth = 300f)
+
+        assertEquals(note1.x, note2.x, 0.01f)
+    }
+
+    @Test
+    fun `whole note gets same x as single context`() {
+        val (formatter, voice, stave) = makeDependencies()
+        val whole = VFStaveNote(VFStaveNoteStruct(listOf("c/4"), "1", 40f))
+        voice.addTickable(whole)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 60f, justifyWidth = 400f)
+
+        assertTrue(whole.x > 60f)
+    }
+
+    @Test
+    fun `first note with accidental gets additional leading offset`() {
+        val (formatter, voice, stave) = makeDependencies()
+        val plain = VFStaveNote(VFStaveNoteStruct(keys = listOf("c/5"), duration = "4", glyphFontScale = 40f))
+        val withAcc = VFStaveNote(VFStaveNoteStruct(keys = listOf("c#/5"), duration = "4", glyphFontScale = 40f))
+
+        voice.clear()
+        voice.addTickable(plain)
+        formatter.formatVoices(listOf(voice), stave, startX = 50f, justifyWidth = 300f)
+        val plainX = plain.x
+
+        voice.clear()
+        voice.addTickable(withAcc)
+        formatter.formatVoices(listOf(voice), stave, startX = 50f, justifyWidth = 300f)
+        val accidentalX = withAcc.x
+
+        assertTrue(accidentalX > plainX + VFMetrics.signatureToNotesGapPx(stave.spacingBetweenLines) / 2f)
+    }
+
+    @Test
+    fun `four quarter notes fit inside measure bounds`() {
+        val stave = VFStave(0f, 100f, 130f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("4/4").apply { setStave(stave) }
+        val notes = listOf("c/5", "d/5", "e/5", "f/5").map { quarterNote(it) }
+        voice.addTickables(notes)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 10f, justifyWidth = 120f)
+
+        val leftBound = stave.x
+        val rightBound = stave.x + stave.width
+        notes.forEachIndexed { i, note ->
+            val m = note.getMetrics()
+            assertTrue(note.x - m.totalLeftPx >= leftBound, "Note $i left overflow")
+            assertTrue(note.x + m.totalRightPx <= rightBound, "Note $i right overflow")
+        }
+    }
+}

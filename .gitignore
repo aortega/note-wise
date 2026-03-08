@@ -1,0 +1,68 @@
+# -----------------------------
+# OS / Editor
+# -----------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build / packaging
+build/
+dist/
+pip-wheel-metadata/
+
+# -----------------------------
+# Android / Gradle
+# -----------------------------
+.gradle/
+**/build/
+**/captures/
+**/.cxx/
+
+# Local SDK / machine-specific config
+**/local.properties
+
+# Android Studio / IntelliJ caches
+**/.idea/
+
+# Kotlin / Java compiled artifacts
+*.class
+
+# Native symbol / crash outputs
+*.hprof
+
+# -----------------------------
+# Logs / temp
+# -----------------------------
+*.log
+*.tmp
+*.swp

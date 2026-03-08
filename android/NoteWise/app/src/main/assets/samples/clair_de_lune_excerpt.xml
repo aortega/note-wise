@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <work><work-title>Clair de Lune Excerpt</work-title></work>
+  <identification>
+    <creator type="composer">Claude Debussy</creator>
+  </identification>
+  <part-list>
+    <score-part id="P1"><part-name>Piano</part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>8</divisions>
+        <key><fifths>-3</fifths><mode>major</mode></key>
+        <time><beats>9</beats><beat-type>8</beat-type></time>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+      <direction><sound tempo="66"/></direction>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><alter>1</alter><duration>4</duration><voice>1</voice><accidental>sharp</accidental></note>
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>8</duration><voice>1</voice></note>
+      <note><rest/><duration>2</duration><voice>1</voice></note>
+    </measure>
+  </part>
+</score-partwise>

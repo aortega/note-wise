@@ -1,0 +1,69 @@
+{
+  "gClef": {
+    "yAnchor": 0.0
+  },
+  "fClef": {
+    "yAnchor": 0.0
+  },
+  "cClef": {
+    "yAnchor": 0.0
+  },
+  "unpitchedPercussionClef1": {
+    "yAnchor": 0.0
+  },
+  "accidentalSharp": {
+    "yAnchor": 0.0,
+    "cutOutNE": [
+      0.84,
+      0.896
+    ],
+    "cutOutNW": [
+      0.144,
+      0.568
+    ],
+    "cutOutSE": [
+      0.84,
+      -0.596
+    ],
+    "cutOutSW": [
+      0.144,
+      -0.896
+    ]
+  },
+  "accidentalFlat": {
+    "yAnchor": 0.0,
+    "cutOutNE": [
+      0.252,
+      0.656
+    ],
+    "cutOutSE": [
+      0.504,
+      -0.476
+    ]
+  },
+  "accidentalNatural": {
+    "yAnchor": 0.0,
+    "cutOutNE": [
+      0.192,
+      0.776
+    ],
+    "cutOutSW": [
+      0.476,
+      -0.828
+    ]
+  },
+  "accidentalDoubleSharp": {
+    "yAnchor": 0.0
+  },
+  "accidentalDoubleFlat": {
+    "yAnchor": 0.0,
+    "cutOutNE": [
+      0.988,
+      0.644
+    ],
+    "cutOutSE": [
+      1.336,
+      -0.396
+    ]
+  }
+}

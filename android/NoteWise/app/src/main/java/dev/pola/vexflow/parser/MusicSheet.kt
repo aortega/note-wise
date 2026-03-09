@@ -30,6 +30,7 @@ data class MeasureAttributes(
     val keyMode: String = "major",
     val timeNumerator: Int = 4,
     val timeDenominator: Int = 4,
+    val timeSymbol: String = "",
     val clefByStaff: Map<Int, String> = mapOf(1 to "treble")
 )
 

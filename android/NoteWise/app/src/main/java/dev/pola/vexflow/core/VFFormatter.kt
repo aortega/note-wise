@@ -60,14 +60,30 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
         val noteheadWidths = ordered.map { (it.rightPx * 2f).coerceAtLeast(0f) }
         val accidentalExtraLeft = ordered.map { (it.leftPx - it.rightPx).coerceAtLeast(0f) }
         val totalNoteVisualWidth = noteheadWidths.sum() + accidentalExtraLeft.sum()
-        val gap = ((barRight - referenceLeft) - totalNoteVisualWidth) / 5f
-        val separation = gap.coerceAtLeast(0f)
 
-        var cursor = referenceLeft + separation
+        // Center the note content block within the available note area: compute a minimum
+        // inter-note gap, then split any remaining space equally as left and right margins.
+        // Reserve space matching the physical left extent of the right barline plus 2 px so
+        // note stems never overlap any part of the barline stroke (critical for END/light-heavy).
+        val minInterNoteGap = stave.spacingBetweenLines * 0.15f
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val available = (barRight - referenceLeft - rightSafety).coerceAtLeast(0f)
+
+        // Reduce inter-note gap proportionally if the measure is too tight to fit all notes
+        // with the minimum gap; fall back to 0 if even that is impossible.
+        val actualInterNoteGap = if (totalNoteVisualWidth + minInterNoteGap * (ordered.size - 1) > available) {
+            ((available - totalNoteVisualWidth) / (ordered.size - 1)).coerceAtLeast(0f)
+        } else {
+            minInterNoteGap
+        }
+        val margin = ((available - totalNoteVisualWidth - actualInterNoteGap * (ordered.size - 1)) / 2f)
+            .coerceAtLeast(0f)
+
+        var cursor = referenceLeft + margin
         ordered.forEachIndexed { index, ctx ->
             val centerX = cursor + accidentalExtraLeft[index] + (noteheadWidths[index] / 2f)
             ctx.x = centerX
-            cursor += accidentalExtraLeft[index] + noteheadWidths[index] + separation
+            cursor += accidentalExtraLeft[index] + noteheadWidths[index] + actualInterNoteGap
         }
         return true
     }

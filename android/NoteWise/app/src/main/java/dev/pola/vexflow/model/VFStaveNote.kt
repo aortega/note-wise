@@ -101,7 +101,11 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
             StemExtents(baseY, targetTopY)
         } else {
             val baseY = noteYs.minOrNull() ?: 0f
-            StemExtents(baseY, baseY + stemHeightPx)
+            // For high notes with downward stems, ensure the stem reaches at least
+            // the third staff line (middle line in a 5-line staff).
+            val maxBottomY = sv.getYForLine(2f)
+            val targetTopY = maxOf(baseY + stemHeightPx, maxBottomY)
+            StemExtents(baseY, targetTopY)
         }
     }
 
@@ -276,7 +280,7 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
     private fun accidentalSpanPx(): Float {
         if (accidentalObjects.isEmpty()) return 0f
         val spacing = stave?.spacingBetweenLines ?: (glyphFontScale / 4f)
-        val noteGap = spacing * 0.5f
+        val noteGap = spacing * 0.1f
         val columnGap = spacing * 0.5f
         val widths = accidentalWidthsPx(spacing)
         // Extra-left span beyond the notehead's own left half-width.
@@ -288,7 +292,7 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
 
         val firstKey = keys.firstOrNull() ?: return emptyList()
         val noteHalfWidth = (safeNoteheadWidth(firstKey, sv) ?: getMetricsFallbackHeadWidth()) / 2f
-        val noteGap = sv.spacingBetweenLines * 0.5f
+        val noteGap = sv.spacingBetweenLines * 0.1f
         val columnGap = sv.spacingBetweenLines * 0.5f
         val widths = accidentalWidthsPx(sv.spacingBetweenLines)
 

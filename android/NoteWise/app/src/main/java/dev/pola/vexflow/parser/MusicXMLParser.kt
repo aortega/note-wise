@@ -154,6 +154,7 @@ class MusicXMLParser {
         var keyMode = previous.keyMode
         var timeNumerator = previous.timeNumerator
         var timeDenominator = previous.timeDenominator
+        var timeSymbol = previous.timeSymbol
         val clefByStaff = previous.clefByStaff.toMutableMap()
 
         var event = parser.next()
@@ -163,6 +164,15 @@ class MusicXMLParser {
                     "divisions" -> divisions = parser.nextText().trim().toIntOrNull() ?: divisions
                     "fifths" -> keyFifths = parser.nextText().trim().toIntOrNull() ?: keyFifths
                     "mode" -> keyMode = parser.nextText().trim().ifEmpty { keyMode }
+                    "time" -> {
+                        val symbol = parser.getAttributeValue(null, "symbol") ?: ""
+                        timeSymbol = when (symbol.lowercase()) {
+                            "common" -> "C"
+                            "cut" -> "C|"
+                            else -> ""
+                        }
+                        // child <beats> and <beat-type> are processed by the outer loop
+                    }
                     "beats" -> timeNumerator = parser.nextText().trim().toIntOrNull() ?: timeNumerator
                     "beat-type" -> timeDenominator = parser.nextText().trim().toIntOrNull() ?: timeDenominator
                     "clef" -> {
@@ -175,12 +185,18 @@ class MusicXMLParser {
             event = parser.next()
         }
 
+        // Validate the visual symbol against actual beats: "common" = 4/4, "cut" = 2/2.
+        // If the symbol doesn't match the actual time, fall back to numeric display.
+        if (timeSymbol == "C" && !(timeNumerator == 4 && timeDenominator == 4)) timeSymbol = ""
+        if (timeSymbol == "C|" && !(timeNumerator == 2 && timeDenominator == 2)) timeSymbol = ""
+
         return MeasureAttributes(
             divisions = divisions,
             keyFifths = keyFifths,
             keyMode = keyMode,
             timeNumerator = timeNumerator,
             timeDenominator = timeDenominator,
+            timeSymbol = timeSymbol,
             clefByStaff = clefByStaff
         )
     }

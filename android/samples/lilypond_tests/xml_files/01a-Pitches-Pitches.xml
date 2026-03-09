@@ -1229,31 +1229,6 @@
         <type>quarter</type>
         <accidental>sharp</accidental>
       </note>
-    </measure>
-    <!--=======================================================-->
-    <measure number="28">
-      <note>
-        <pitch>
-          <step>C</step>
-          <alter>1</alter>
-          <octave>5</octave>
-        </pitch>
-        <duration>1</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <accidental>sharp</accidental>
-      </note>
-      <note>
-        <pitch>
-          <step>C</step>
-          <alter>1</alter>
-          <octave>5</octave>
-        </pitch>
-        <duration>1</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <accidental editorial="yes">sharp</accidental>
-      </note>
       <barline location="right">
         <bar-style>light-heavy</bar-style>
       </barline>

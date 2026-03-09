@@ -452,7 +452,12 @@ SAF file picker, URI handling, recent files list.
 | VFLineBreaker.kt | Automatic line breaking based on available width |
 | VFPageLayout.kt | Vertical system positioning, margins |
 
-**Exit:** Multi-measure piece renders across multiple lines with auto line breaks.
+**Two-phase visual conformance strategy (adopted 2026-03-08):**
+
+- **Phase 1 — Match alphaTab:** Use alphaTab renders as the NoteWise golden reference. Comparison uses 1% pixel-diff tolerance (YIQ perceptual, AA-aware) mirroring alphaTab's own `VisualTestHelper`. alphaTab test suite lives at `android/reference/alphaTab-develop/packages/alphatab/test/visualTests/features/LilyPondMusicXML.test.ts`. Human-driven golden promotion via `approval_manifest.json`. 3-way review panels: LilyPond | alphaTab | NoteWise (LilyPond is the quality compass, not a pass/fail target).
+- **Phase 2 — Improve toward LilyPond/MuseScore:** Once NoteWise matches alphaTab within tolerance, tighten note-spacing constants (spring-rod `minDurationWidth`, `stretchForce`) to approach LilyPond's professional engraving density (~10 measures per row vs alphaTab's 4).
+
+**Exit:** Multi-measure piece renders across multiple lines with auto line breaks; Tier-1 LilyPond fixtures pass Phase 1 pixel-diff gate against alphaTab golden.
 
 ---
 

@@ -30,16 +30,12 @@ class VFTimeSignature(timeSpec: String = "4/4") {
             if (glyphs.isEmpty()) return 0f
             var total = 0f
             for (glyph in glyphs) {
-                val glyphWidth =
-                    digitGlyphName(glyph)
-                        ?.let { VFGlyphBoundingBoxManager.get(it)?.scaled(staffSpacing)?.width }
-                        ?: (sizePx * 0.6f)
-                total += glyphWidth
+                total += digitAdvanceForStaffSpacing(glyph, staffSpacing)
             }
             return total
         }
 
-        return maxOf(numericRunWidth(topGlyphs), numericRunWidth(bottomGlyphs)).coerceAtLeast(width)
+        return maxOf(numericRunWidth(topGlyphs), numericRunWidth(bottomGlyphs))
     }
 
     private val isCommonTime: Boolean = timeSpec == "C"
@@ -85,21 +81,36 @@ class VFTimeSignature(timeSpec: String = "4/4") {
     }
 
     private fun drawNumeric(stave: VFStave, ctx: VexRenderingContext) {
+        val staffSpacing = stave.spacingBetweenLines
         var topX = x
         val topY = stave.getYForLine(1f)
         for (glyph in topGlyphs) {
             val originY = adjustedDigitOriginY(glyph, topY, stave)
-            ctx.drawSmuflGlyph(glyph, topX, originY, sizePx)
-            topX += sizePx * 0.6f
+            val drawX = topX - digitLeftBearingForStaffSpacing(glyph, staffSpacing)
+            ctx.drawSmuflGlyph(glyph, drawX, originY, sizePx)
+            topX += digitAdvanceForStaffSpacing(glyph, staffSpacing)
         }
 
         var bottomX = x
         val bottomY = stave.getYForLine(3f)
         for (glyph in bottomGlyphs) {
             val originY = adjustedDigitOriginY(glyph, bottomY, stave)
-            ctx.drawSmuflGlyph(glyph, bottomX, originY, sizePx)
-            bottomX += sizePx * 0.6f
+            val drawX = bottomX - digitLeftBearingForStaffSpacing(glyph, staffSpacing)
+            ctx.drawSmuflGlyph(glyph, drawX, originY, sizePx)
+            bottomX += digitAdvanceForStaffSpacing(glyph, staffSpacing)
         }
+    }
+
+    private fun digitAdvanceForStaffSpacing(codepoint: Int, staffSpacing: Float): Float {
+        return digitGlyphName(codepoint)
+            ?.let { VFGlyphBoundingBoxManager.get(it)?.scaled(staffSpacing)?.width }
+            ?: (sizePx * 0.6f)
+    }
+
+    private fun digitLeftBearingForStaffSpacing(codepoint: Int, staffSpacing: Float): Float {
+        return digitGlyphName(codepoint)
+            ?.let { VFGlyphBoundingBoxManager.get(it)?.scaled(staffSpacing)?.southwest?.x }
+            ?: 0f
     }
 
     private fun adjustedDigitOriginY(glyph: Int, centerY: Float, stave: VFStave): Float {

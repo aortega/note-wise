@@ -24,11 +24,13 @@ class LilyPondTier1VisualTest {
 
     @Test
     fun `tier1 lilypond fixtures render stable`() {
+        // Phase 1 tolerance: 1.0% YIQ pixel-diff against alphaTab golden reference (DEC-026).
         val allFixtures = listOf(
-            Fixture("01a-Pitches-Pitches.xml", "01a_pitches_pitches", 2.8),
-            Fixture("11a-TimeSignatures.xml", "11a_time_signatures", 2.6),
-            Fixture("12aa-Clefs_Pitch_Traditional.xml", "12aa_clefs_pitch_traditional", 2.8),
-            Fixture("13a-KeySignatures.xml", "13a_key_signatures", 2.8)
+            Fixture("01a-Pitches-Pitches.xml", "01a_pitches_pitches", 1.0),
+            Fixture("01b-Pitches-Intervals.xml", "01b_pitches_intervals", 1.0),
+            Fixture("11a-TimeSignatures.xml", "11a_time_signatures", 1.0),
+            Fixture("12aa-Clefs_Pitch_Traditional.xml", "12aa_clefs_pitch_traditional", 1.0),
+            Fixture("13a-KeySignatures.xml", "13a_key_signatures", 1.0)
         )
 
         val fixtureFilter = parseFixtureFilterFromEnv()
@@ -48,11 +50,13 @@ class LilyPondTier1VisualTest {
 
         val widthsFromEnv = parseWidthsFromEnv(default = emptyList())
         val manifestReferenceSizes = loadManifestReferenceSizes()
-        val staffSpacingPx = parseStaffSpacingFromEnv(default = 7f)
-        val startYPx = parseStartYFromEnv(default = 8f)
+        // Match alphaTab's default staff spacing (9px per space) and fixed first-stave Y.
+        // alphaTab goldens are rendered at 9px/space with the first stave top-line at y≈13.
+        val staffSpacingPx = parseStaffSpacingFromEnv(default = 9f)
+        val startYPx = parseStartYFromEnv(default = 13f)
 
         for (fixture in fixtures) {
-            val xmlFile = resolveFixtureFile("samples/lilypond_tests/xml_files/${fixture.xmlFile}")
+            val xmlFile = resolveFixtureFile("NoteWise/app/src/main/assets/samples/lilypond_tests/xml_files/${fixture.xmlFile}")
             assertTrue("Fixture should exist: ${xmlFile.absolutePath}", xmlFile.exists())
 
             val sheet = xmlFile.inputStream().use { MusicXMLParser().parse(it) }

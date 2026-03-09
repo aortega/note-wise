@@ -40,10 +40,19 @@ class VFStave(
 
     fun getYForLine(line: Float): Float = y + line * spacingBetweenLines
 
-    private fun openingBoundaryPaddingPx(): Float =
-        spacingBetweenLines * options.openingBoundarySpacingSpaces
+    private fun openingBoundaryScale(): Float = options.openingBoundarySpacingSpaces
 
-    private fun leftPaddingPx(): Float = openingBoundaryPaddingPx()
+    private fun leftPaddingPx(): Float =
+        spacingBetweenLines * VFMetrics.STAVE_LEFT_PADDING_SPACES * openingBoundaryScale()
+
+    private fun clefPaddingPx(): Float =
+        VFMetrics.clefPaddingPx(spacingBetweenLines) * openingBoundaryScale()
+
+    private fun keySignaturePaddingPx(): Float =
+        VFMetrics.keySignaturePaddingPx(spacingBetweenLines) * openingBoundaryScale()
+
+    private fun timeSignaturePaddingPx(): Float =
+        VFMetrics.timeSignaturePaddingPx(spacingBetweenLines) * openingBoundaryScale()
 
     /**
      * Converts a music-style line index (bottom line = 1) to top-based line index used by getYForLine.
@@ -79,19 +88,19 @@ class VFStave(
         clef?.let {
             startX +=
                 it.widthForStaffSpacing(spacingBetweenLines) +
-                    openingBoundaryPaddingPx()
+                    clefPaddingPx()
         }
         keySignature?.let {
             if (!it.isEmpty) {
                 startX +=
                     it.widthForStaffSpacing(spacingBetweenLines) +
-                        openingBoundaryPaddingPx()
+                        keySignaturePaddingPx()
             }
         }
         timeSignature?.let {
             startX +=
                 it.widthForStaffSpacing(spacingBetweenLines) +
-                    openingBoundaryPaddingPx()
+                    timeSignaturePaddingPx()
         }
         return startX
     }
@@ -141,7 +150,7 @@ class VFStave(
             it.draw(this, ctx)
             curX +=
                 it.widthForStaffSpacing(spacingBetweenLines) +
-                    openingBoundaryPaddingPx()
+                    clefPaddingPx()
         }
         keySignature?.let {
             if (!it.isEmpty) {
@@ -149,7 +158,7 @@ class VFStave(
                 it.draw(this, ctx)
                 curX +=
                     it.widthForStaffSpacing(spacingBetweenLines) +
-                        openingBoundaryPaddingPx()
+                        keySignaturePaddingPx()
             }
         }
         timeSignature?.let {

@@ -38,6 +38,21 @@ class VFBarline(var type: VFBarlineType = VFBarlineType.SINGLE) {
     private val dotRadius = 1.5f
     private val dotPad = 4f
 
+    /**
+     * Returns how far to the LEFT of the barline anchor (stave.x + stave.width) the barline's
+     * leftmost visual pixel sits. Used by the formatter and estimator to reserve a right-side
+     * safety margin so note glyphs never overlap the barline strokes.
+     */
+    fun leftExtentPx(): Float = when (type) {
+        VFBarlineType.NONE   -> 0f
+        VFBarlineType.SINGLE -> thinWidth / 2f                            // 0.75 px
+        VFBarlineType.DOUBLE -> thinWidth / 2f + 2f + thinWidth           // ~5.25 px
+        VFBarlineType.END    -> thickWidth + 2f + thinWidth / 2f          // 7.75 px
+        VFBarlineType.REPEAT_BEGIN -> thinWidth / 2f                      // dots to the right, thin is leftmost
+        VFBarlineType.REPEAT_END   -> dotPad + dotRadius * 3f             // dot column is leftmost
+        VFBarlineType.REPEAT_BOTH  -> dotPad + dotRadius * 3f
+    }
+
     fun draw(ctx: VexRenderingContext) {
         val sv = stave ?: return
         when (type) {

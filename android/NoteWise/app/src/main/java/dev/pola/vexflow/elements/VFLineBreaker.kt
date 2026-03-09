@@ -106,11 +106,24 @@ object VFLineBreaker {
         }
 
         if (currentRow.isNotEmpty()) {
+            // Compute the "natural" width of the last row: the sum of each measure's minimum
+            // content width with no stretching to fill the full system.
+            // Also include the clef injection extra for the first measure: when a measure that had
+            // no clef on its source stave becomes first in a new row, relayoutRow injects a clef
+            // which expands the signature area. naturalWidth must include that extra so the compact
+            // row isn't compressed below the actual minimum.
+            val naturalWidth = currentRow.sumOf { estimateMinWidth(it).toDouble() }.toFloat() +
+                computeClefInjectionExtra(currentRow)
+            // Fill-ratio rule: if the last row is ≥67% full, expand it to match the other rows
+            // so the score looks justified. Below that threshold the row is sparse, and stretching
+            // would spread notes too far apart, so we use the natural compact width instead.
+            val lastRowFillRatio = naturalWidth / systemWidth
+            val lastRowWidth = if (lastRowFillRatio >= 0.67f) systemWidth else naturalWidth
             val (placed, bounds) = placeRow(
                 row = currentRow.toList(),
                 startX = startX,
                 proposedY = currentY,
-                systemWidth = systemWidth,
+                systemWidth = lastRowWidth,
                 previousBounds = previousRowBounds,
                 additionalSystemSpacing = systemSpacing
             )
@@ -134,8 +147,11 @@ object VFLineBreaker {
         var bounds = estimateRowContentBounds(relaid)
 
         if (previousBounds != null) {
-            val spacing = 2f * maxOf(previousBounds.maxStaffSpacing, bounds.maxStaffSpacing)
-            val desiredTop = previousBounds.bottom + spacing + additionalSystemSpacing
+            val spacing = maxOf(
+                additionalSystemSpacing,
+                2f * maxOf(previousBounds.maxStaffSpacing, bounds.maxStaffSpacing)
+            )
+            val desiredTop = previousBounds.bottom + spacing
             val deltaY = desiredTop - bounds.top
             if (deltaY != 0f) {
                 relaid = shiftRowVertically(relaid, deltaY)
@@ -146,13 +162,28 @@ object VFLineBreaker {
         return relaid to bounds
     }
 
+    private fun computeClefInjectionExtra(row: List<MusicSheetToVF.RenderedMeasure>): Float {
+        val firstStaff = row.firstOrNull()?.staves?.firstOrNull() ?: return 0f
+        if (firstStaff.stave.clef != null) return 0f
+        val spacing = firstStaff.stave.spacingBetweenLines
+        val clef = VFClef(firstStaff.resolvedClefType, "default", null).apply {
+            sizePx = spacing * 4f
+        }
+        return runCatching { clef.widthForStaffSpacing(spacing) + spacing }.getOrElse { 0f }
+    }
+
     private fun relayoutRow(
         row: List<MusicSheetToVF.RenderedMeasure>,
         startX: Float,
         y: Float,
         systemWidth: Float
     ): List<MusicSheetToVF.RenderedMeasure> {
-        val minWidths = row.map { estimateMinWidth(it) }
+        // If the first measure in this row will receive an injected clef (its source stave has
+        // none), add the clef width to its minimum budget so notes don't overflow the barline.
+        val clefInjectionExtra = computeClefInjectionExtra(row)
+        val minWidths = row.mapIndexed { index, measure ->
+            estimateMinWidth(measure) + if (index == 0) clefInjectionExtra else 0f
+        }
         val minWidthSum = minWidths.sum()
         val weights = row.map { estimateWeight(it) }
         val weightSum = weights.sum().coerceAtLeast(1f)
@@ -174,7 +205,7 @@ object VFLineBreaker {
             .flatMap { measure -> measure.staves.map { staff -> staff.staffNumber } }
             .distinct()
             .sorted()
-        val targetStaffYs = computeTargetStaffYs(row, y, rowTopY, staffNumbersInRow)
+        val targetStaffYs = computeTargetStaffYs(row, y, staffNumbersInRow)
 
         var cursor = startX
         return row.mapIndexed { index, measure ->
@@ -195,6 +226,10 @@ object VFLineBreaker {
                         sizePx = relaidStave.spacingBetweenLines * 4f
                     }
                 }
+                staffRender.voices.forEach { voice ->
+                    voice.setStave(relaidStave)
+                    voice.tickables.forEach { note -> note.setStave(relaidStave) }
+                }
                 staffRender.copy(stave = relaidStave)
             }
             cursor += width
@@ -206,20 +241,12 @@ object VFLineBreaker {
     private fun computeTargetStaffYs(
         row: List<MusicSheetToVF.RenderedMeasure>,
         rowStartY: Float,
-        sourceRowTopY: Float,
         staffNumbersInRow: List<Int>
     ): Map<Int, Float> {
         if (staffNumbersInRow.isEmpty()) return emptyMap()
 
         val stavesByMeasure = row.map { measure ->
             measure.staves.associateBy { it.staffNumber }
-        }
-
-        val preferredOffsets = staffNumbersInRow.mapIndexed { index, staffNumber ->
-            stavesByMeasure
-                .firstNotNullOfOrNull { measureStaffs -> measureStaffs[staffNumber]?.stave?.y }
-                ?.minus(sourceRowTopY)
-                ?: (index * 80f)
         }
 
         val extentsByStaff = staffNumbersInRow.map { staffNumber ->
@@ -238,31 +265,18 @@ object VFLineBreaker {
         }
 
         val ys = MutableList(staffNumbersInRow.size) { 0f }
-        ys[0] = rowStartY + preferredOffsets[0]
+        // Rule 1: first staff's stave.y is fixed at rowStartY.
+        // This matches alphaTab's behavior: the first stave starts at a fixed pixel offset
+        // from the canvas top (rowStartY), regardless of content extents above the staff lines.
+        // Content (clefs, high notes) may extend above rowStartY and will be clipped at y=0.
+        ys[0] = rowStartY
+        // Rule 2: each subsequent staff's content top is exactly 2 × staffSpacing below
+        //         the previous staff's content bottom.
         for (index in 1 until staffNumbersInRow.size) {
-            val preferredY = rowStartY + preferredOffsets[index]
-            val previous = extentsByStaff[index - 1]
-            val current = extentsByStaff[index]
-            val requiredGap = 2f * maxOf(previous.spacing, current.spacing)
-            // Use a small safety buffer in addition to the explicit 2x spacing gap,
-            // because content extents are estimated from rendered geometry.
-            val contentSafety = maxOf(previous.spacing, current.spacing)
-            val minY = ys[index - 1] + previous.bottomDelta - current.topDelta + requiredGap + contentSafety
-            ys[index] = maxOf(preferredY, minY)
-        }
-
-        // Keep absolute row content inside the visible canvas budget anchored by rowStartY.
-        // Dynamic staff spacing avoids overlaps between staves; this shift avoids clipping above the canvas.
-        val minContentTop = ys.indices.minOfOrNull { idx ->
-            ys[idx] + extentsByStaff[idx].topDelta
-        } ?: rowStartY
-        val topSafetyMargin = extentsByStaff.maxOfOrNull { it.spacing } ?: 0f
-        val targetTop = rowStartY + topSafetyMargin
-        if (minContentTop < targetTop) {
-            val shiftDown = targetTop - minContentTop
-            for (idx in ys.indices) {
-                ys[idx] += shiftDown
-            }
+            val prev = extentsByStaff[index - 1]
+            val curr = extentsByStaff[index]
+            val gap = 2f * maxOf(prev.spacing, curr.spacing)
+            ys[index] = ys[index - 1] + prev.bottomDelta - curr.topDelta + gap
         }
 
         return staffNumbersInRow.zip(ys).toMap()
@@ -355,24 +369,53 @@ object VFLineBreaker {
         contexts.forEach { it.preFormat() }
 
         val signatureGap = VFMetrics.signatureToNotesGapPx(stave.spacingBetweenLines)
-        val minTickGap = 10f
+        // Reserve space for the physical extent of the right barline plus a 2 px breathing gap.
+        // For a light-heavy (END) barline this is ~9.75 px; for a single barline ~2.75 px.
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+
+        // Gourlay spring-rod model (mirrors alphaTab's BarLayoutingInfo).
+        // Each beat slot contributes phi × minDurationWidth pixels of horizontal space, where:
+        //   phi = 1 + 0.85 × log₂(slotDuration / minDuration)
+        //   minDuration = 1/64 (64th note as fraction of a whole note)
+        //   minDurationWidth = 7 px  (alphaTab default)
+        // This replaces the flat minTickGap=10 approach and yields ~30.8 px/quarter vs the old
+        // 10 px gap, closely matching alphaTab's bar-width and therefore its line-break points.
+        val minDurationFraction = 1.0 / 64.0   // 64th note
+        val minDurationWidth = 7.0
+        val resolution = voices.firstOrNull()?.getResolutionMultiplier()?.toDouble() ?: 4096.0
 
         if (contexts.size == 1) {
-            // First context is anchored with its left extent consumed by x-positioning logic.
-            val rightSafety = stave.spacingBetweenLines * measureRightSafetySpaces()
-            return signatureGap + contexts.first().rightPx + rightSafety
+            // Single beat: apply Gourlay spring width for the beat's own duration.
+            val slotDuration = contexts[0].getMaxDuration().doubleValue.coerceAtLeast(minDurationFraction)
+            val phi = 1.0 + 0.85 * (Math.log(slotDuration / minDurationFraction) / Math.log(2.0))
+            val singleWidth = contexts[0].leftPx + (phi * minDurationWidth).toFloat() + contexts[0].rightPx + rightSafety
+            return signatureGap + singleWidth
         }
 
-        var chainWidth = signatureGap
-        for (i in 1 until contexts.size) {
-            val previous = contexts[i - 1]
-            val current = contexts[i]
-            chainWidth += previous.rightPx + current.leftPx + minTickGap
+        // preSpringWidth: left glyph extent of the first beat (accidentals + half-notehead).
+        var voiceWidth = contexts.first().leftPx
+
+        for (i in contexts.indices) {
+            val slotVexTicks: Double = if (i < contexts.size - 1) {
+                (contexts[i + 1].tickID - contexts[i].tickID).toDouble()
+            } else {
+                // Last slot: use the beat's own maximum note duration.
+                contexts[i].getMaxDuration().doubleValue * resolution
+            }
+            val slotDuration = (slotVexTicks / resolution).coerceAtLeast(minDurationFraction)
+            val phi = 1.0 + 0.85 * (Math.log(slotDuration / minDurationFraction) / Math.log(2.0))
+            voiceWidth += (phi * minDurationWidth).toFloat()
+
+            // Include the left accidental/glyph extent of the next beat position.
+            if (i < contexts.size - 1) {
+                voiceWidth += contexts[i + 1].leftPx
+            }
         }
-        chainWidth += contexts.last().rightPx
-        // Explicit tail room prevents right-edge glyph overhangs crossing barlines.
-        chainWidth += stave.spacingBetweenLines * measureRightSafetySpaces()
-        return chainWidth
+
+        // postSpringWidth: right glyph extent of the last beat.
+        voiceWidth += contexts.last().rightPx
+        voiceWidth += rightSafety
+        return signatureGap + voiceWidth
     }
 
     private fun estimateRowContentBounds(row: List<MusicSheetToVF.RenderedMeasure>): RowContentBounds {
@@ -387,8 +430,10 @@ object VFLineBreaker {
             measure.staves.forEach { staffRender ->
                 val stave = staffRender.stave
                 val extents = estimateStaffContentExtents(staffRender)
-                top = minOf(top, stave.y + extents.topDelta)
-                bottom = maxOf(bottom, stave.y + extents.bottomDelta)
+                // Include stave lines themselves in bounds so inter-row spacing is measured
+                // from stave bottom (not just note content), matching alphaTab's system-distance.
+                top = minOf(top, stave.y + extents.topDelta, stave.getTopLineTopY())
+                bottom = maxOf(bottom, stave.y + extents.bottomDelta, stave.getBottomLineBottomY())
                 maxStaffSpacing = maxOf(maxStaffSpacing, stave.spacingBetweenLines)
             }
         }

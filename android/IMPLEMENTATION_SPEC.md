@@ -4199,73 +4199,82 @@ The following pitfalls were observed in implementation iterations and are now ma
 | Full rebuild on every resize causes instability/flicker | Add resize-aware relayout path that reflows systems without reparsing source data. |
 | Regressions escape due weak visual checks | Keep deterministic visual goldens for wide + narrow + attribute-change scenarios and fail build on mismatch. |
 
-## M10 Visual Rendering Test Strategy (LilyPond-style)
+## M10 Visual Rendering Test Strategy — Two-Phase Conformance
 
-Use `android/samples/lilypond_tests` as the canonical fixture corpus for M10 rendering validation.
+Use `android/NoteWise/app/src/main/assets/samples/lilypond_tests` as the canonical fixture corpus.
 
 ### Corpus definition
 
-- Source XML fixtures: `android/samples/lilypond_tests/xml_files/`
-- Reference PNG corpus: `android/samples/lilypond_tests/images/`
-- Metadata mapping XML->PNG: `android/samples/lilypond_tests/test_metadata.json`
+- Source XML fixtures: `android/NoteWise/app/src/main/assets/samples/lilypond_tests/xml_files/`
+- Reference PNG corpus (LilyPond): `android/NoteWise/app/src/main/assets/samples/lilypond_tests/images/`
+- Metadata mapping XML→PNG: `android/NoteWise/app/src/main/assets/samples/lilypond_tests/test_metadata.json`
+- alphaTab test suite: `android/reference/alphaTab-develop/packages/alphatab/test/visualTests/features/LilyPondMusicXML.test.ts`
+- alphaTab rendered candidates: `android/reference/alphaTab-develop/packages/alphatab/test-data/visual-tests/lilypond/`
+- NoteWise approval manifest: `android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/approval_manifest.json`
 
-### Three-reference model (required)
+### Phase 1 — Match alphaTab (deterministic baseline)
 
-For each selected fixture, maintain three reference artifacts:
+**Reference target:** alphaTab renders, not LilyPond. alphaTab implements the Gourlay spring-rod spacing model with well-defined constants — "matching" is achievable and automatable.
 
-1. `lilypond_reference.png` (upstream LilyPond image)
-2. `alphatab_proxy.png` (alphaTab render of same XML under normalized test settings)
-3. `notewise_actual.png` (NoteWise render under M10 test harness)
+**Comparison algorithm (mirrors alphaTab's `VisualTestHelper._expectToEqualVisuallyAsync`):**
+- Pixel-diff via YIQ perceptual color distance (`PixelMatch`, threshold=0.3)
+- Anti-aliased edge pixels excluded (`includeAA=false`)
+- Pass condition: `differentPixels / (totalPixels − transparentPixels) ≤ 1%`
+- Size mismatch → auto-fail (scale actual into expected dimensions, draw red border)
+- On fail → save `*.new.png` + `*.diff.png` alongside golden; on pass → delete them
 
-Rationale:
-- LilyPond and NoteWise differ in engraving defaults and text/font stack, so direct pixel parity is not always realistic.
-- alphaTab proxy gives an intermediate, MusicXML-focused renderer baseline to isolate parser/layout issues from style-only differences.
+**Human-driven golden promotion:** `approval_manifest.json` tracks fixture status (pending / approved / rejected). CLI workflow: `generate-panels` → human reviews 3-way panel → `approve` / `reject`.
 
-### Normalization profile (must be applied before comparison)
+**3-way review panel layout:** LilyPond reference | alphaTab render | NoteWise candidate
+- LilyPond is the aspirational quality compass — not a pass/fail target in Phase 1.
+- alphaTab is the pass/fail target in Phase 1.
 
-- Fixed width profile per run: `420`, `720`, `1080`, `1440`
-- White background, deterministic DPI/scale, deterministic rendering seed/path
-- Bravura notation font for NoteWise glyph rendering
-- Header/footer suppression where possible to reduce non-engraving noise
-- Stable cropping policy:
-    - either pad to target canvas size, or
-    - center-crop all three images to common bounds
+**Tier-1 fixtures (must pass Phase 1 before closing M10):**
+- `01a-Pitches-Pitches.xml`
+- `01b-Pitches-Intervals.xml`
+- `11a-TimeSignatures.xml`
+- `12aa-Clefs_Pitch_Traditional.xml`
+- `13a-KeySignatures.xml`
 
-### Comparison policy
+**alphaTab render generation:**
+```
+cd android/reference/alphaTab-develop
+/opt/homebrew/bin/npm test -- --grep LilyPondMusicXML
+# Generates *.new.png in test-data/visual-tests/lilypond/
+# Accept renders: npm run test-accept-reference
+```
 
-- Automated:
-    - Continue NoteWise golden asserts for deterministic regressions (`.new/.diff` artifacts on mismatch)
-    - Use perceptual+pixel diff against `alphatab_proxy.png` for triage (not hard fail when difference is known style variance)
-- Manual confirmation required:
-    - When dimensions/fonts differ materially between LilyPond and Bravura output, create a reconstructed comparison image with normalized size and staff scale and perform human sign-off.
-    - Manual review result must be logged in `android/docs/AGENT_DECISIONS.md` with fixture IDs and verdict.
+**NoteWise test run:**
+```
+cd android/NoteWise
+LILYPOND_FIXTURES="<fixture.xml>" ./gradlew testDebugUnitTest --tests "*LilyPondTier1VisualTest*"
+```
 
-### Fixture tiers for M10 closure
+### Phase 2 — Improve toward LilyPond / MuseScore
 
-- Tier 1 (must pass before closing M10):
-    - `11a-TimeSignatures.xml`
-    - `12a-Clefs.xml`
-    - `13a-KeySignatures.xml`
-    - `21a-Chord-Basic.xml`
-    - `03b-Rhythm-Backup.xml`
-- Tier 2 (expand after Tier 1 green):
-    - `01a-Pitches-Pitches.xml`
-    - `02a-Rests-Durations.xml`
-    - `03c-Rhythm-DivisionChange.xml`
-    - `13e-KeySignatures-Cancel.xml`
+Once NoteWise passes Phase 1 (≤1% pixel diff against alphaTab for all Tier-1 fixtures):
+- Tighten note-spacing constants (spring-rod `minDurationWidth`, `stretchForce`, `measureRightSafetySpaces`)
+- Target: LilyPond's ~10 measures/row density vs alphaTab's current 4 measures/row
+- Re-promote both alphaTab and NoteWise goldens as spacing improves
+- LilyPond remains the aspirational pass condition
 
-### alphaTab proxy usage
+### Observation: density gap (2026-03-08)
 
-- Generate `alphatab_proxy.png` using alphaTab visual test harness settings (Skia engine, highDpiFactor=1, lazy loading disabled).
-- Record alphaTab settings snapshot next to generated proxy artifacts so proxy images are reproducible.
+| Renderer | Measures/row at 635px | Total height for 41 measures |
+|---|---|---|
+| LilyPond (reference) | ~10 | 367px |
+| alphaTab (master ref) | 4 | 1399px |
+| NoteWise (current) | ~6 | ~635px |
+
+Both alphaTab and NoteWise are far from LilyPond's professional engraving density. This is a spring-rod algorithm parameter tuning problem deferred to Phase 2.
 
 ### Manual sign-off checklist (required for M10 close)
 
 - Barline, clef, key/time signature placement matches expected semantics.
-- No cross-staff chord leakage.
+- No cross-staff chord leakage or note-barline collision.
 - Tie continuity and beam grouping remain semantically correct across system breaks.
-- Spacing is visually stable across all width profiles.
-- Reviewer confirms deviations are style-only (not semantic/engraving errors).
+- Spacing is visually stable across width profiles (420/720/1080/1440).
+- Phase 1 gate: all Tier-1 fixtures ≤1% pixel diff against alphaTab golden.
 
 **Files to create:**
 
@@ -4474,7 +4483,7 @@ class MultiStaveSheetMusicView @JvmOverloads constructor(
 - [ ] Bounds lookup is populated for at least system/measure/note and supports hit lookup by position
 - [ ] Multi-part selection path exists and is covered by tests (no production hardcode to first part)
 - [ ] Visual golden tests pass for grand staff fixtures and full Clair de Lune snapshots
-- [ ] LilyPond-tier visual strategy executed for Tier 1 fixtures with alphaTab proxy artifacts and manual sign-off notes
+- [ ] Phase 1 visual conformance: all Tier-1 LilyPond fixtures ≤1% pixel diff against alphaTab golden (per approval_manifest.json); 3-way review panels (LilyPond | alphaTab | NoteWise) reviewed and signed off
 - [ ] `./gradlew :app:testDebugUnitTest :app:assembleDebug` passes
 
 ---

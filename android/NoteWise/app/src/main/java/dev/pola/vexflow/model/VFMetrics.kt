@@ -4,11 +4,13 @@ package dev.pola.vexflow.model
  * Global layout constants. All values are in screen pixels.
  */
 object VFMetrics {
-    const val CLEF_PADDING_SPACES: Float = 1f
-    const val KEY_SIGNATURE_PADDING_SPACES: Float = 1f
-    const val TIME_SIGNATURE_PADDING_SPACES: Float = 1f
+    // Match alphaTab opening spacing more closely: 6px initial inset and
+    // 0.5-space pre-beat gaps at the default 9px staff spacing.
+    const val CLEF_PADDING_SPACES: Float = 0.5f
+    const val KEY_SIGNATURE_PADDING_SPACES: Float = 0.5f
+    const val TIME_SIGNATURE_PADDING_SPACES: Float = 0.5f
     // Left inset before the first modifier, expressed in staff-space units.
-    const val STAVE_LEFT_PADDING_SPACES: Float = 1f
+    const val STAVE_LEFT_PADDING_SPACES: Float = 0.6666667f
     const val SIGNATURE_TO_NOTES_GAP_SPACES: Float = 0f
     const val STAVE_END_PADDING: Float = 10f
     const val DEFAULT_LINE_SPACING: Float = 10f

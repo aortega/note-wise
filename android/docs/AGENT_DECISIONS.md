@@ -2,6 +2,55 @@
 
 Capture architecture and process decisions made during autonomous implementation.
 
+## DEC-026 - Adopt Two-Phase Visual Conformance Strategy (alphaTab → LilyPond)
+- Date: 2026-03-08
+- Milestone: M10
+- Context: Direct pixel comparison against LilyPond reference images is unrealistic
+  because LilyPond uses a fundamentally different spacing algorithm (compact, ~10
+  measures/row at 635px) vs NoteWise (~6) and alphaTab (~4). The quality gap is too
+  large for a pixel-diff gate to be meaningful.
+- Decision: Two-phase plan.
+  Phase 1 — Match alphaTab: use alphaTab renders as the NoteWise golden reference.
+  Comparison: YIQ perceptual pixel-diff ≤1% (mirrors alphaTab's VisualTestHelper/PixelMatch
+  algorithm: threshold=0.3, includeAA=false, diffMask=true). On fail: save *.new.png
+  + *.diff.png. Human-driven golden promotion via approval_manifest.json.
+  Phase 2 — Improve toward LilyPond/MuseScore: once Phase 1 passes for all Tier-1
+  fixtures, tune note-spacing constants (spring-rod minDurationWidth, stretchForce)
+  to approach LilyPond's professional engraving density.
+- Artifacts:
+  - alphaTab test suite: `android/reference/alphaTab-develop/packages/alphatab/test/visualTests/features/LilyPondMusicXML.test.ts`
+  - 3-way review panels: LilyPond | alphaTab | NoteWise (LilyPond is quality compass only)
+  - Density observation: LilyPond ~10 bars/row, alphaTab 4 bars/row, NoteWise 6 bars/row (all at 635px)
+- Alternatives considered: (1) Match LilyPond directly — unrealistic given algorithm
+  gap. (2) Self-consistency only (NoteWise matches its own previous renders) — too
+  easy, provides no quality floor.
+- Consequences: M10 Phase 1 gate = all Tier-1 fixtures ≤1% diff against alphaTab
+  golden. Phase 2 is a separate quality improvement phase after M10 closes.
+
+## DEC-025 - Reserve Clef Injection Width In relayoutRow Budget Only
+- Date: 2026-03-08
+- Milestone: M10
+- Context: `relayoutRow` injects a clef into the first measure of each non-first row (`if (index == 0 && relaidStave.clef == null)`). The clef is added AFTER the source `minWidths` are computed, so the first measure's allocated budget excluded the clef overhead, causing notes to overflow the right barline in measures 7, 13, 18, 23.
+- Decision: Compute `clefInjectionExtra` (scaled glyph bbox width + one staff spacing boundary) in `relayoutRow` only, adding it to `minWidths[0]` before proportional expansion. Deliberately do NOT propagate this correction to the packing loop in `layout()`, so the 6-measures-per-row decision is preserved while the per-measure width budget within `relayoutRow` is accurate.
+- Alternatives considered: (1) Add clef overhead in `layout()` too — would cause the packer to fit fewer measures per row, regressing the improved packing density. (2) Move clef injection into the parsing/source-stave preparation stage — would require significant structural changes to data flow.
+- Consequences: Notes in row-head first measures stay within barlines. Row count remains at 5 (matching LilyPond). If the clef injection policy changes, `relayoutRow` must be updated alongside it.
+
+## DEC-024 - Mirror Four-Quarter Formatter Formula In Estimator Fast Path
+- Date: 2026-03-08
+- Milestone: M10
+- Context: `estimateStaffNoteAreaWidth` used `minTickGap = 10f` between consecutive tick contexts (3 gaps × 10px = 30px overhead for 4-note measures). `VFFormatter.applyFourQuarterGridIfApplicable` sets `separation = gap.coerceAtLeast(0f)` — minimum 0 — so the formatter can pack notes with zero inter-note gap. The estimator was therefore systematically over-conservative for 4-quarter measures.
+- Decision: Detect `contexts.size == 4 && contexts.all { it.getMaxDuration() == VFFraction.of(1,4) }` and return `signatureGap + totalNoteVisualWidth + rightSafety` where `totalNoteVisualWidth = sum(rightPx*2) + sum((leftPx−rightPx).coerceAtLeast(0))`, exactly matching the formatter. Fall through to the existing chain formula for all other patterns.
+- Alternatives considered: (1) Lower `minTickGap` globally — would under-estimate dense non-quarter patterns. (2) Eliminate the gap requirement entirely — would cause over-packing for irregular rhythms.
+- Consequences: Row packing for 4/4 measures with 4 quarter notes now matches what the formatter actually produces, enabling 5-row layout that matches LilyPond's reference. Other rhythmic patterns continue using the conservative chain formula.
+
+## DEC-023 - Use 0.1 Staff-Spaces As Accidental-To-Notehead Gap
+- Date: 2026-03-08
+- Milestone: M10
+- Context: `noteGap = spacing * 0.5f` was chosen in the previous session as a "staff-space-relative" value, but 0.5 staff spaces (~3.5px at spacing=7) is 3-4x larger than standard music engraving practice. LilyPond uses approximately 0.1-0.15 staff spaces between the notehead left edge and the nearest accidental column right edge.
+- Decision: Change `noteGap` to `spacing * 0.1f` in both `accidentalSpanPx()` and `accidentalColumnCenters()`. This matches standard engraving and reduces the per-accidental note-area estimate by ~11px, which contributes to improved row packing density.
+- Alternatives considered: (1) Keep 0.5 — visually too much separation. (2) Use 0.0 — accidentals would touch notehead edge with no buffer.
+- Consequences: Accidentals are visually tighter to noteheads, row packing density improves, and the value is closer to professional engraving standards. If the note gap needs adjustment for other clef/font combinations, this constant should be revisited.
+
 ## DEC-022 - Require Multi-Clef Evidence Before Virtual Grand-Staff Inference
 - Date: 2026-03-08
 - Milestone: M10

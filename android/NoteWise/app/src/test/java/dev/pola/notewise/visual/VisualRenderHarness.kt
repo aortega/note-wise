@@ -53,26 +53,34 @@ object VisualRenderHarness {
         fixedHeightPx: Int? = null,
         horizontalPadding: Float = 0f,
         startY: Float = 70f,
-        systemSpacing: Float = parseSystemSpacingFromEnv(default = 28.6f)
+        systemSpacing: Float = parseSystemSpacingFromEnv(default = -1f)
     ): Bitmap {
         val debugLayout = System.getenv("LILYPOND_DEBUG_LAYOUT")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
         val debugRefineRows = System.getenv("LILYPOND_DEBUG_REFINE_ROWS")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
         val showBarNumbers = System.getenv("LILYPOND_SHOW_BAR_NUMBERS")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
-        val firstSystemTargetMeasures = parseFirstSystemTargetFromEnv(default = 6)
+        // Gourlay spring-rod estimation now drives ALL rows (including the first) so that
+        // NoteWise's line-breaking matches alphaTab's natural layout.  Set
+        // LILYPOND_FIRST_SYSTEM_MEASURES=N to force a fixed first-system bar count.
+        val firstSystemTargetMeasures = parseFirstSystemTargetFromEnv(default = null)
         val maxStaffSpacingPx = measures
             .flatMap { it.staves }
             .maxOfOrNull { it.stave.spacingBetweenLines }
             ?: 7f
-        val leftDebugMarginPx = if (debugLayout) 2f * maxStaffSpacingPx else 0f
-        val startX = horizontalPadding + leftDebugMarginPx
-        val availableWidth = (widthPx.toFloat() - startX - horizontalPadding).coerceAtLeast(240f)
+        // Left and right margin = 7px matching alphaTab's display.padding = [7, 0, 7, 0]
+        // (left=7, right=7), giving available width = widthPx - 7 - 7.
+        val leftMarginPx = 7f
+        val startX = horizontalPadding + leftMarginPx
+        val availableWidth = (widthPx.toFloat() - startX - leftMarginPx).coerceAtLeast(240f)
+        // System spacing: auto-computed as 6.4× staffSpacing when not overridden by env var.
+        // For 9px stave spacing this gives ≈57.6px, matching alphaTab's inter-row system-distance.
+        val actualSystemSpacing = if (systemSpacing >= 12f) systemSpacing else maxStaffSpacingPx * 6.4f
 
         val layout = VFLineBreaker.layout(
             measures = measures,
             systemWidth = availableWidth,
             startX = startX,
             startY = startY,
-            systemSpacing = systemSpacing,
+            systemSpacing = actualSystemSpacing,
             firstSystemTargetMeasures = firstSystemTargetMeasures
         )
 
@@ -103,7 +111,10 @@ object VisualRenderHarness {
             .flatMap { it.staves }
             .maxOfOrNull { it.stave.getBottomLineBottomY() }
             ?: (startY + 120f)
-        val dynamicHeight = (maxOf(maxGlyphBottom, maxStaffBottom) + 48f).toInt().coerceAtLeast(220)
+        // Add 11 staff-spaces of bottom buffer so notes far below the staff (e.g. G2 which sits
+        // ~10 spaces below the treble bottom line) never clip out of the canvas.
+        val dynamicHeight = (maxOf(maxGlyphBottom, maxStaffBottom) + maxStaffSpacingPx * 11f).toInt()
+            .coerceAtLeast(220)
         val totalHeight = fixedHeightPx?.coerceAtLeast(64) ?: dynamicHeight
 
         val bitmap = Bitmap.createBitmap(widthPx, totalHeight, Bitmap.Config.ARGB_8888)
@@ -278,7 +289,7 @@ object VisualRenderHarness {
                 }
             }
 
-            if (debugLayout && rowIndex > 0) {
+            if (rowIndex > 0) {
                 val firstMeasure = rowMeasures.firstOrNull()
                 val topStave = firstMeasure?.staves?.firstOrNull()?.stave
                 if (firstMeasure != null && topStave != null) {
@@ -288,7 +299,7 @@ object VisualRenderHarness {
                     val fm = barNumberPaint.fontMetrics
                     // Keep the text box fully above targetBottomY so it never overlaps the staff bbox.
                     val baselineY = maxOf(12f - fm.ascent, targetBottomY - fm.descent - 2f)
-                    val leftX = (topStave.x - leftDebugMarginPx + maxStaffSpacingPx * 0.2f).coerceAtLeast(2f)
+                    val leftX = (topStave.x - leftMarginPx + maxStaffSpacingPx * 0.2f).coerceAtLeast(2f)
 
                     val bgLeft = leftX
                     val bgTop = baselineY + fm.ascent - 2f
@@ -583,7 +594,7 @@ object VisualRenderHarness {
         return palette[index % palette.size]
     }
 
-    private fun parseFirstSystemTargetFromEnv(default: Int): Int? {
+    private fun parseFirstSystemTargetFromEnv(default: Int? = null): Int? {
         val raw = System.getenv("LILYPOND_FIRST_SYSTEM_MEASURES")?.trim().orEmpty()
         if (raw.isEmpty()) return default
         val parsed = raw.toIntOrNull() ?: return default

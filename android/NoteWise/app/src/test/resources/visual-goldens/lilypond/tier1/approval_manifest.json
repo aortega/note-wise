@@ -1,58 +1,72 @@
 {
+  "01a-Pitches-Pitches.xml": {
+    "fixture_xml": "01a-Pitches-Pitches.xml",
+    "golden_stem": "01a_pitches_pitches",
+    "status": "approved",
+    "reference_image": "c5/lily-7663f27d.png",
+    "reference_size": [
+      635,
+      1428
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/01a_pitches_pitches_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1428, no title, padding=[7,0,7,0], NoteWise startY=-2.1)",
+    "updated_at": "2026-03-08T23:30:00.000000+00:00"
+  },
+  "01b-Pitches-Intervals.xml": {
+    "fixture_xml": "01b-Pitches-Intervals.xml",
+    "golden_stem": "01b_pitches_intervals",
+    "status": "approved",
+    "reference_image": "ff/lily-abbed967.png",
+    "reference_size": [
+      635,
+      1069
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/01b_pitches_intervals_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1069, no title, padding=[7,0,7,0], NoteWise startY=-2.1)",
+    "updated_at": "2026-03-08T23:30:00.000000+00:00"
+  },
   "11a-TimeSignatures.xml": {
     "fixture_xml": "11a-TimeSignatures.xml",
     "golden_stem": "11a_time_signatures",
-    "status": "rejected",
+    "status": "approved",
     "reference_image": "b2/lily-bf3bc260.png",
     "reference_size": [
       634,
-      122
+      167
     ],
-    "approved_golden": null,
-    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/11a_time_signatures_634.new.png",
-    "note": "Rejected by user",
-    "updated_at": "2026-03-08T00:10:02.529674+00:00"
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/11a_time_signatures_634.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (634x167, no title, padding=[7,0,7,0], NoteWise startY=-2.1)",
+    "updated_at": "2026-03-08T23:30:00.000000+00:00"
   },
   "12aa-Clefs_Pitch_Traditional.xml": {
     "fixture_xml": "12aa-Clefs_Pitch_Traditional.xml",
     "golden_stem": "12aa_clefs_pitch_traditional",
-    "status": "rejected",
+    "status": "approved",
     "reference_image": "cb/lily-5ae4bd0d.png",
     "reference_size": [
       635,
-      175
+      83
     ],
-    "approved_golden": null,
-    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/12aa_clefs_pitch_traditional_635.new.png",
-    "note": "No good render",
-    "updated_at": "2026-03-08T00:15:34.894472+00:00"
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/12aa_clefs_pitch_traditional_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x83, no title, padding=[7,0,7,0], NoteWise startY=-2.1)",
+    "updated_at": "2026-03-08T23:30:00.000000+00:00"
   },
   "13a-KeySignatures.xml": {
     "fixture_xml": "13a-KeySignatures.xml",
     "golden_stem": "13a_key_signatures",
-    "status": "pending",
+    "status": "approved",
     "reference_image": "05/lily-49426352.png",
     "reference_size": [
       635,
-      582
+      713
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/13a_key_signatures_635.png",
-    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/13a_key_signatures_635.new.png",
-    "note": "reset",
-    "updated_at": "2026-03-08T06:52:17.490160+00:00"
-  },
-  "01a-Pitches-Pitches.xml": {
-    "fixture_xml": "01a-Pitches-Pitches.xml",
-    "golden_stem": "01a_pitches_pitches",
-    "status": "pending",
-    "reference_image": "c5/lily-7663f27d.png",
-    "reference_size": [
-      635,
-      564
-    ],
-    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/01a_pitches_pitches_720.png",
-    "last_candidate": "android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/01a_pitches_pitches_720.new.png",
-    "note": "reset",
-    "updated_at": "2026-03-08T06:52:17.337598+00:00"
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x713, no title, padding=[7,0,7,0], NoteWise startY=-2.1)",
+    "updated_at": "2026-03-08T23:30:00.000000+00:00"
   }
 }

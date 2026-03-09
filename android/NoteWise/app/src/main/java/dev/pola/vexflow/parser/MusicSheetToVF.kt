@@ -110,7 +110,9 @@ object MusicSheetToVF {
                 } ?: true
             val showTimeSigForMeasure =
                 index == 0 || previousAttributes?.let {
-                    it.timeNumerator != attrs.timeNumerator || it.timeDenominator != attrs.timeDenominator
+                    it.timeNumerator != attrs.timeNumerator ||
+                        it.timeDenominator != attrs.timeDenominator ||
+                        it.timeSymbol != attrs.timeSymbol
                 } ?: true
 
             convertMeasure(
@@ -188,7 +190,7 @@ object MusicSheetToVF {
                     keySignature = VFKeySignature(fifthsToKeySpec(attrs.keyFifths, attrs.keyMode))
                 }
                 if (showTimeSig && staffIndex == 0) {
-                    timeSignature = VFTimeSignature("${attrs.timeNumerator}/${attrs.timeDenominator}").apply {
+                    timeSignature = VFTimeSignature(attrs.timeSymbol.ifEmpty { "${attrs.timeNumerator}/${attrs.timeDenominator}" }).apply {
                         sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
                     }
                 }
@@ -328,7 +330,7 @@ object MusicSheetToVF {
         }
 
         val timeWidth = if (showTimeSig) {
-            val time = VFTimeSignature("${attrs.timeNumerator}/${attrs.timeDenominator}").apply {
+            val time = VFTimeSignature(attrs.timeSymbol.ifEmpty { "${attrs.timeNumerator}/${attrs.timeDenominator}" }).apply {
                 sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
             }
             runCatching { time.widthForStaffSpacing(staffLineSpacingPx) }
@@ -337,11 +339,15 @@ object MusicSheetToVF {
             0f
         }
 
-        val boundaries = 1 + (if (showClef) 1 else 0) + (if (showKeySig) 1 else 0) + (if (showTimeSig) 1 else 0)
+        val openingPaddingAtOneScale =
+            (staffLineSpacingPx * VFMetrics.STAVE_LEFT_PADDING_SPACES) +
+                (if (showClef) VFMetrics.clefPaddingPx(staffLineSpacingPx) else 0f) +
+                (if (showKeySig) VFMetrics.keySignaturePaddingPx(staffLineSpacingPx) else 0f) +
+                (if (showTimeSig) VFMetrics.timeSignaturePaddingPx(staffLineSpacingPx) else 0f)
         val openingWidthAtOneSpace =
-            (boundaries * staffLineSpacingPx) + clefWidth + keyWidth + timeWidth
+            openingPaddingAtOneScale + clefWidth + keyWidth + timeWidth
         val openingWidthAtHalfSpace =
-            (boundaries * staffLineSpacingPx * 0.5f) + clefWidth + keyWidth + timeWidth
+            (openingPaddingAtOneScale * 0.5f) + clefWidth + keyWidth + timeWidth
 
         val usableOneSpace = staveWidth - openingWidthAtOneSpace
         val usableHalfSpace = staveWidth - openingWidthAtHalfSpace

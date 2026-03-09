@@ -1,0 +1,1952 @@
+{
+  "01a-Pitches-Pitches.xml": {
+    "fixture_xml": "01a-Pitches-Pitches.xml",
+    "golden_stem": "01a_pitches_pitches",
+    "status": "approved",
+    "reference_size": [
+      635,
+      1418
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01a_pitches_pitches_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1418, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "01b-Pitches-Intervals.xml": {
+    "fixture_xml": "01b-Pitches-Intervals.xml",
+    "golden_stem": "01b_pitches_intervals",
+    "status": "approved",
+    "reference_size": [
+      635,
+      1059
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01b_pitches_intervals_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1059, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "01c-Pitches-NoVoiceElement.xml": {
+    "fixture_xml": "01c-Pitches-NoVoiceElement.xml",
+    "golden_stem": "01c_pitches_novoiceelement",
+    "status": "approved",
+    "reference_size": [
+      635,
+      83
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01c_pitches_novoiceelement_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x83, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "01d-Pitches-Microtones.xml": {
+    "fixture_xml": "01d-Pitches-Microtones.xml",
+    "golden_stem": "01d_pitches_microtones",
+    "status": "approved",
+    "reference_size": [
+      635,
+      75
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01d_pitches_microtones_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x75, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "01e-Pitches-ParenthesizedAccidentals.xml": {
+    "fixture_xml": "01e-Pitches-ParenthesizedAccidentals.xml",
+    "golden_stem": "01e_pitches_parenthesizedaccidentals",
+    "status": "approved",
+    "reference_size": [
+      635,
+      163
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01e_pitches_parenthesizedaccidentals_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x163, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "01f-Pitches-ParenthesizedMicrotoneAccidentals.xml": {
+    "fixture_xml": "01f-Pitches-ParenthesizedMicrotoneAccidentals.xml",
+    "golden_stem": "01f_pitches_parenthesizedmicrotoneaccidentals",
+    "status": "approved",
+    "reference_size": [
+      635,
+      169
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01f_pitches_parenthesizedmicrotoneaccidentals_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x169, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "02a-Rests-Durations.xml": {
+    "fixture_xml": "02a-Rests-Durations.xml",
+    "golden_stem": "02a_rests_durations",
+    "status": "approved",
+    "reference_size": [
+      635,
+      333
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02a_rests_durations_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x333, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "02b-Rests-PitchedRests.xml": {
+    "fixture_xml": "02b-Rests-PitchedRests.xml",
+    "golden_stem": "02b_rests_pitchedrests",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02b_rests_pitchedrests_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "02c-Rests-MultiMeasureRests.xml": {
+    "fixture_xml": "02c-Rests-MultiMeasureRests.xml",
+    "golden_stem": "02c_rests_multimeasurerests",
+    "status": "approved",
+    "reference_size": [
+      635,
+      412
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02c_rests_multimeasurerests_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x412, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "02d-Rests-Multimeasure-TimeSignatures.xml": {
+    "fixture_xml": "02d-Rests-Multimeasure-TimeSignatures.xml",
+    "golden_stem": "02d_rests_multimeasure_timesignatures",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02d_rests_multimeasure_timesignatures_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "02e-Rests-NoType.xml": {
+    "fixture_xml": "02e-Rests-NoType.xml",
+    "golden_stem": "02e_rests_notype",
+    "status": "approved",
+    "reference_size": [
+      635,
+      169
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02e_rests_notype_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x169, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03a-Rhythm-Durations.xml": {
+    "fixture_xml": "03a-Rhythm-Durations.xml",
+    "golden_stem": "03a_rhythm_durations",
+    "status": "approved",
+    "reference_size": [
+      635,
+      568
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03a_rhythm_durations_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x568, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03b-Rhythm-Backup.xml": {
+    "fixture_xml": "03b-Rhythm-Backup.xml",
+    "golden_stem": "03b_rhythm_backup",
+    "status": "approved",
+    "reference_size": [
+      635,
+      103
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03b_rhythm_backup_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x103, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03c-Rhythm-DivisionChange.xml": {
+    "fixture_xml": "03c-Rhythm-DivisionChange.xml",
+    "golden_stem": "03c_rhythm_divisionchange",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03c_rhythm_divisionchange_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03d-Rhythm-DottedDurations-Factors.xml": {
+    "fixture_xml": "03d-Rhythm-DottedDurations-Factors.xml",
+    "golden_stem": "03d_rhythm_dotteddurations_factors",
+    "status": "approved",
+    "reference_size": [
+      635,
+      242
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03d_rhythm_dotteddurations_factors_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x242, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03e-Rhythm-No-Divisions.xml": {
+    "fixture_xml": "03e-Rhythm-No-Divisions.xml",
+    "golden_stem": "03e_rhythm_no_divisions",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03e_rhythm_no_divisions_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "03f-Rhythm-Forward.xml": {
+    "fixture_xml": "03f-Rhythm-Forward.xml",
+    "golden_stem": "03f_rhythm_forward",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/03f_rhythm_forward_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11a-TimeSignatures.xml": {
+    "fixture_xml": "11a-TimeSignatures.xml",
+    "golden_stem": "11a_timesignatures",
+    "status": "approved",
+    "reference_size": [
+      634,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11a_timesignatures_634.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (634x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11b-TimeSignatures-NoTime.xml": {
+    "fixture_xml": "11b-TimeSignatures-NoTime.xml",
+    "golden_stem": "11b_timesignatures_notime",
+    "status": "approved",
+    "reference_size": [
+      635,
+      144
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11b_timesignatures_notime_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x144, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11c-TimeSignatures-CompoundSimple.xml": {
+    "fixture_xml": "11c-TimeSignatures-CompoundSimple.xml",
+    "golden_stem": "11c_timesignatures_compoundsimple",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11c_timesignatures_compoundsimple_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11d-TimeSignatures-CompoundMultiple.xml": {
+    "fixture_xml": "11d-TimeSignatures-CompoundMultiple.xml",
+    "golden_stem": "11d_timesignatures_compoundmultiple",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11d_timesignatures_compoundmultiple_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11e-TimeSignatures-CompoundMixed.xml": {
+    "fixture_xml": "11e-TimeSignatures-CompoundMixed.xml",
+    "golden_stem": "11e_timesignatures_compoundmixed",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11e_timesignatures_compoundmixed_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11f-TimeSignatures-SymbolMeaning.xml": {
+    "fixture_xml": "11f-TimeSignatures-SymbolMeaning.xml",
+    "golden_stem": "11f_timesignatures_symbolmeaning",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11f_timesignatures_symbolmeaning_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11g-TimeSignatures-SingleNumber.xml": {
+    "fixture_xml": "11g-TimeSignatures-SingleNumber.xml",
+    "golden_stem": "11g_timesignatures_singlenumber",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11g_timesignatures_singlenumber_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "11h-TimeSignatures-SenzaMisura.xml": {
+    "fixture_xml": "11h-TimeSignatures-SenzaMisura.xml",
+    "golden_stem": "11h_timesignatures_senzamisura",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/11h_timesignatures_senzamisura_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "12a-Clefs.xml": {
+    "fixture_xml": "12a-Clefs.xml",
+    "golden_stem": "12a_clefs",
+    "status": "approved",
+    "reference_size": [
+      635,
+      450
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/12a_clefs_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x450, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "12b-Clefs-NoKeyOrClef.xml": {
+    "fixture_xml": "12b-Clefs-NoKeyOrClef.xml",
+    "golden_stem": "12b_clefs_nokeyorclef",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/12b_clefs_nokeyorclef_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13a-KeySignatures.xml": {
+    "fixture_xml": "13a-KeySignatures.xml",
+    "golden_stem": "13a_keysignatures",
+    "status": "approved",
+    "reference_size": [
+      635,
+      703
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13a_keysignatures_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x703, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13b-KeySignatures-ChurchModes.xml": {
+    "fixture_xml": "13b-KeySignatures-ChurchModes.xml",
+    "golden_stem": "13b_keysignatures_churchmodes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      87
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13b_keysignatures_churchmodes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x87, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13c-KeySignatures-NonTraditional.xml": {
+    "fixture_xml": "13c-KeySignatures-NonTraditional.xml",
+    "golden_stem": "13c_keysignatures_nontraditional",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13c_keysignatures_nontraditional_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13d-KeySignatures-Microtones.xml": {
+    "fixture_xml": "13d-KeySignatures-Microtones.xml",
+    "golden_stem": "13d_keysignatures_microtones",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13d_keysignatures_microtones_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13e-KeySignatures-Cancel.xml": {
+    "fixture_xml": "13e-KeySignatures-Cancel.xml",
+    "golden_stem": "13e_keysignatures_cancel",
+    "status": "approved",
+    "reference_size": [
+      635,
+      82
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13e_keysignatures_cancel_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x82, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "13f-KeySignatures-Visible.xml": {
+    "fixture_xml": "13f-KeySignatures-Visible.xml",
+    "golden_stem": "13f_keysignatures_visible",
+    "status": "approved",
+    "reference_size": [
+      635,
+      76
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/13f_keysignatures_visible_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x76, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "14a-StaffDetails-LineChanges.xml": {
+    "fixture_xml": "14a-StaffDetails-LineChanges.xml",
+    "golden_stem": "14a_staffdetails_linechanges",
+    "status": "approved",
+    "reference_size": [
+      635,
+      90
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/14a_staffdetails_linechanges_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x90, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21a-Chord-Basic.xml": {
+    "fixture_xml": "21a-Chord-Basic.xml",
+    "golden_stem": "21a_chord_basic",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21a_chord_basic_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21b-Chords-TwoNotes.xml": {
+    "fixture_xml": "21b-Chords-TwoNotes.xml",
+    "golden_stem": "21b_chords_twonotes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21b_chords_twonotes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21c-Chords-ThreeNotesDuration.xml": {
+    "fixture_xml": "21c-Chords-ThreeNotesDuration.xml",
+    "golden_stem": "21c_chords_threenotesduration",
+    "status": "approved",
+    "reference_size": [
+      635,
+      88
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21c_chords_threenotesduration_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x88, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21d-Chords-SchubertStabatMater.xml": {
+    "fixture_xml": "21d-Chords-SchubertStabatMater.xml",
+    "golden_stem": "21d_chords_schubertstabatmater",
+    "status": "approved",
+    "reference_size": [
+      635,
+      124
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21d_chords_schubertstabatmater_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x124, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21e-Chords-PickupMeasures.xml": {
+    "fixture_xml": "21e-Chords-PickupMeasures.xml",
+    "golden_stem": "21e_chords_pickupmeasures",
+    "status": "approved",
+    "reference_size": [
+      635,
+      74
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21e_chords_pickupmeasures_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x74, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21f-Chord-ElementInBetween.xml": {
+    "fixture_xml": "21f-Chord-ElementInBetween.xml",
+    "golden_stem": "21f_chord_elementinbetween",
+    "status": "approved",
+    "reference_size": [
+      635,
+      117
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21f_chord_elementinbetween_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x117, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21g-Chords-Tremolos.xml": {
+    "fixture_xml": "21g-Chords-Tremolos.xml",
+    "golden_stem": "21g_chords_tremolos",
+    "status": "approved",
+    "reference_size": [
+      635,
+      109
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21g_chords_tremolos_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x109, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "21h-Chord-Accidentals.xml": {
+    "fixture_xml": "21h-Chord-Accidentals.xml",
+    "golden_stem": "21h_chord_accidentals",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/21h_chord_accidentals_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "22a-Noteheads.xml": {
+    "fixture_xml": "22a-Noteheads.xml",
+    "golden_stem": "22a_noteheads",
+    "status": "approved",
+    "reference_size": [
+      635,
+      1167
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/22a_noteheads_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1167, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "22b-Staff-Notestyles.xml": {
+    "fixture_xml": "22b-Staff-Notestyles.xml",
+    "golden_stem": "22b_staff_notestyles",
+    "status": "approved",
+    "reference_size": [
+      635,
+      238
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/22b_staff_notestyles_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x238, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "22c-Noteheads-Chords.xml": {
+    "fixture_xml": "22c-Noteheads-Chords.xml",
+    "golden_stem": "22c_noteheads_chords",
+    "status": "approved",
+    "reference_size": [
+      635,
+      126
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/22c_noteheads_chords_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x126, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "22d-Parenthesized-Noteheads.xml": {
+    "fixture_xml": "22d-Parenthesized-Noteheads.xml",
+    "golden_stem": "22d_parenthesized_noteheads",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/22d_parenthesized_noteheads_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23a-Tuplets.xml": {
+    "fixture_xml": "23a-Tuplets.xml",
+    "golden_stem": "23a_tuplets",
+    "status": "approved",
+    "reference_size": [
+      635,
+      102
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23a_tuplets_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x102, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23b-Tuplets-Styles.xml": {
+    "fixture_xml": "23b-Tuplets-Styles.xml",
+    "golden_stem": "23b_tuplets_styles",
+    "status": "approved",
+    "reference_size": [
+      635,
+      363
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23b_tuplets_styles_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x363, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23c-Tuplet-Display-NonStandard.xml": {
+    "fixture_xml": "23c-Tuplet-Display-NonStandard.xml",
+    "golden_stem": "23c_tuplet_display_nonstandard",
+    "status": "approved",
+    "reference_size": [
+      635,
+      269
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23c_tuplet_display_nonstandard_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x269, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23d-Tuplets-Nested.xml": {
+    "fixture_xml": "23d-Tuplets-Nested.xml",
+    "golden_stem": "23d_tuplets_nested",
+    "status": "approved",
+    "reference_size": [
+      635,
+      86
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23d_tuplets_nested_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x86, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23e-Tuplets-Tremolo.xml": {
+    "fixture_xml": "23e-Tuplets-Tremolo.xml",
+    "golden_stem": "23e_tuplets_tremolo",
+    "status": "approved",
+    "reference_size": [
+      635,
+      233
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23e_tuplets_tremolo_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x233, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "23f-Tuplets-DurationButNoBracket.xml": {
+    "fixture_xml": "23f-Tuplets-DurationButNoBracket.xml",
+    "golden_stem": "23f_tuplets_durationbutnobracket",
+    "status": "approved",
+    "reference_size": [
+      635,
+      181
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/23f_tuplets_durationbutnobracket_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x181, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24a-GraceNotes.xml": {
+    "fixture_xml": "24a-GraceNotes.xml",
+    "golden_stem": "24a_gracenotes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      165
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24a_gracenotes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x165, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24b-ChordAsGraceNote.xml": {
+    "fixture_xml": "24b-ChordAsGraceNote.xml",
+    "golden_stem": "24b_chordasgracenote",
+    "status": "approved",
+    "reference_size": [
+      635,
+      80
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24b_chordasgracenote_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x80, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24c-GraceNote-MeasureEnd.xml": {
+    "fixture_xml": "24c-GraceNote-MeasureEnd.xml",
+    "golden_stem": "24c_gracenote_measureend",
+    "status": "approved",
+    "reference_size": [
+      635,
+      89
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24c_gracenote_measureend_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x89, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24d-AfterGrace.xml": {
+    "fixture_xml": "24d-AfterGrace.xml",
+    "golden_stem": "24d_aftergrace",
+    "status": "approved",
+    "reference_size": [
+      635,
+      97
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24d_aftergrace_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x97, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24e-GraceNote-StaffChange.xml": {
+    "fixture_xml": "24e-GraceNote-StaffChange.xml",
+    "golden_stem": "24e_gracenote_staffchange",
+    "status": "approved",
+    "reference_size": [
+      635,
+      154
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24e_gracenote_staffchange_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x154, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24f-GraceNote-Slur.xml": {
+    "fixture_xml": "24f-GraceNote-Slur.xml",
+    "golden_stem": "24f_gracenote_slur",
+    "status": "approved",
+    "reference_size": [
+      635,
+      84
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24f_gracenote_slur_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x84, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24g-GraceNote-Dynamics.xml": {
+    "fixture_xml": "24g-GraceNote-Dynamics.xml",
+    "golden_stem": "24g_gracenote_dynamics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      125
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24g_gracenote_dynamics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x125, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "24h-GraceNote-Simultaneous.xml": {
+    "fixture_xml": "24h-GraceNote-Simultaneous.xml",
+    "golden_stem": "24h_gracenote_simultaneous",
+    "status": "approved",
+    "reference_size": [
+      635,
+      287
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/24h_gracenote_simultaneous_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x287, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "31a-Directions.xml": {
+    "fixture_xml": "31a-Directions.xml",
+    "golden_stem": "31a_directions",
+    "status": "approved",
+    "reference_size": [
+      635,
+      863
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/31a_directions_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x863, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "31b-Directions-Order.xml": {
+    "fixture_xml": "31b-Directions-Order.xml",
+    "golden_stem": "31b_directions_order",
+    "status": "approved",
+    "reference_size": [
+      635,
+      142
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/31b_directions_order_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x142, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "31c-MetronomeMarks.xml": {
+    "fixture_xml": "31c-MetronomeMarks.xml",
+    "golden_stem": "31c_metronomemarks",
+    "status": "approved",
+    "reference_size": [
+      635,
+      95
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/31c_metronomemarks_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x95, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "31d-Directions-Compounds.xml": {
+    "fixture_xml": "31d-Directions-Compounds.xml",
+    "golden_stem": "31d_directions_compounds",
+    "status": "approved",
+    "reference_size": [
+      635,
+      392
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/31d_directions_compounds_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x392, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "32a-Notations.xml": {
+    "fixture_xml": "32a-Notations.xml",
+    "golden_stem": "32a_notations",
+    "status": "approved",
+    "reference_size": [
+      635,
+      1234
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/32a_notations_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x1234, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "32b-Articulations-Texts.xml": {
+    "fixture_xml": "32b-Articulations-Texts.xml",
+    "golden_stem": "32b_articulations_texts",
+    "status": "approved",
+    "reference_size": [
+      635,
+      87
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/32b_articulations_texts_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x87, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "32c-MultipleNotationChildren.xml": {
+    "fixture_xml": "32c-MultipleNotationChildren.xml",
+    "golden_stem": "32c_multiplenotationchildren",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/32c_multiplenotationchildren_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "32d-Arpeggio.xml": {
+    "fixture_xml": "32d-Arpeggio.xml",
+    "golden_stem": "32d_arpeggio",
+    "status": "approved",
+    "reference_size": [
+      635,
+      141
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/32d_arpeggio_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x141, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33a-Spanners.xml": {
+    "fixture_xml": "33a-Spanners.xml",
+    "golden_stem": "33a_spanners",
+    "status": "approved",
+    "reference_size": [
+      635,
+      600
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33a_spanners_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x600, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33b-Spanners-Tie.xml": {
+    "fixture_xml": "33b-Spanners-Tie.xml",
+    "golden_stem": "33b_spanners_tie",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33b_spanners_tie_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33c-Spanners-Slurs.xml": {
+    "fixture_xml": "33c-Spanners-Slurs.xml",
+    "golden_stem": "33c_spanners_slurs",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33c_spanners_slurs_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33da-Spanners-OctaveShifts-before.xml": {
+    "fixture_xml": "33da-Spanners-OctaveShifts-before.xml",
+    "golden_stem": "33da_spanners_octaveshifts_before",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33da_spanners_octaveshifts_before_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33db-Spanners-OctaveShifts-after.xml": {
+    "fixture_xml": "33db-Spanners-OctaveShifts-after.xml",
+    "golden_stem": "33db_spanners_octaveshifts_after",
+    "status": "approved",
+    "reference_size": [
+      635,
+      91
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33db_spanners_octaveshifts_after_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x91, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33e-Spanners-OctaveShifts-InvalidSize.xml": {
+    "fixture_xml": "33e-Spanners-OctaveShifts-InvalidSize.xml",
+    "golden_stem": "33e_spanners_octaveshifts_invalidsize",
+    "status": "approved",
+    "reference_size": [
+      635,
+      166
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33e_spanners_octaveshifts_invalidsize_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x166, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33f-Trill-EndingOnGraceNote.xml": {
+    "fixture_xml": "33f-Trill-EndingOnGraceNote.xml",
+    "golden_stem": "33f_trill_endingongracenote",
+    "status": "approved",
+    "reference_size": [
+      635,
+      159
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33f_trill_endingongracenote_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x159, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33g-Slur-ChordedNotes.xml": {
+    "fixture_xml": "33g-Slur-ChordedNotes.xml",
+    "golden_stem": "33g_slur_chordednotes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      76
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33g_slur_chordednotes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x76, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33h-Spanners-Glissando.xml": {
+    "fixture_xml": "33h-Spanners-Glissando.xml",
+    "golden_stem": "33h_spanners_glissando",
+    "status": "approved",
+    "reference_size": [
+      635,
+      186
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33h_spanners_glissando_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x186, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33i-Ties-NotEnded.xml": {
+    "fixture_xml": "33i-Ties-NotEnded.xml",
+    "golden_stem": "33i_ties_notended",
+    "status": "approved",
+    "reference_size": [
+      635,
+      84
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33i_ties_notended_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x84, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "33j-Beams-Tremolos.xml": {
+    "fixture_xml": "33j-Beams-Tremolos.xml",
+    "golden_stem": "33j_beams_tremolos",
+    "status": "approved",
+    "reference_size": [
+      635,
+      139
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/33j_beams_tremolos_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x139, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "34a-Print-Object-Spanners.xml": {
+    "fixture_xml": "34a-Print-Object-Spanners.xml",
+    "golden_stem": "34a_print_object_spanners",
+    "status": "approved",
+    "reference_size": [
+      635,
+      395
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/34a_print_object_spanners_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x395, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "34b-Colors.xml": {
+    "fixture_xml": "34b-Colors.xml",
+    "golden_stem": "34b_colors",
+    "status": "approved",
+    "reference_size": [
+      635,
+      850
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/34b_colors_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x850, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "34c-Font-Size.xml": {
+    "fixture_xml": "34c-Font-Size.xml",
+    "golden_stem": "34c_font_size",
+    "status": "approved",
+    "reference_size": [
+      635,
+      439
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/34c_font_size_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x439, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41a-MultiParts-Partorder.xml": {
+    "fixture_xml": "41a-MultiParts-Partorder.xml",
+    "golden_stem": "41a_multiparts_partorder",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41a_multiparts_partorder_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41b-MultiParts-MoreThan10.xml": {
+    "fixture_xml": "41b-MultiParts-MoreThan10.xml",
+    "golden_stem": "41b_multiparts_morethan10",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41b_multiparts_morethan10_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41c-StaffGroups.xml": {
+    "fixture_xml": "41c-StaffGroups.xml",
+    "golden_stem": "41c_staffgroups",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41c_staffgroups_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41d-StaffGroups-Nested.xml": {
+    "fixture_xml": "41d-StaffGroups-Nested.xml",
+    "golden_stem": "41d_staffgroups_nested",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41d_staffgroups_nested_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41e-StaffGroups-InstrumentNames-Linebroken.xml": {
+    "fixture_xml": "41e-StaffGroups-InstrumentNames-Linebroken.xml",
+    "golden_stem": "41e_staffgroups_instrumentnames_linebroken",
+    "status": "approved",
+    "reference_size": [
+      635,
+      412
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41e_staffgroups_instrumentnames_linebroken_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x412, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41f-StaffGroups-Overlapping.xml": {
+    "fixture_xml": "41f-StaffGroups-Overlapping.xml",
+    "golden_stem": "41f_staffgroups_overlapping",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41f_staffgroups_overlapping_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41g-StaffGroups-NestingOrder.xml": {
+    "fixture_xml": "41g-StaffGroups-NestingOrder.xml",
+    "golden_stem": "41g_staffgroups_nestingorder",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41g_staffgroups_nestingorder_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41h-TooManyParts.xml": {
+    "fixture_xml": "41h-TooManyParts.xml",
+    "golden_stem": "41h_toomanyparts",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41h_toomanyparts_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41i-PartNameDisplay-Override.xml": {
+    "fixture_xml": "41i-PartNameDisplay-Override.xml",
+    "golden_stem": "41i_partnamedisplay_override",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41i_partnamedisplay_override_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41j-PartNameDisplay-Multiple-DisplayText-Children.xml": {
+    "fixture_xml": "41j-PartNameDisplay-Multiple-DisplayText-Children.xml",
+    "golden_stem": "41j_partnamedisplay_multiple_displaytext_children",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41j_partnamedisplay_multiple_displaytext_children_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41k-PartName-Print.xml": {
+    "fixture_xml": "41k-PartName-Print.xml",
+    "golden_stem": "41k_partname_print",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41k_partname_print_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "41l-GroupNameDisplay-Override.xml": {
+    "fixture_xml": "41l-GroupNameDisplay-Override.xml",
+    "golden_stem": "41l_groupnamedisplay_override",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/41l_groupnamedisplay_override_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "42a-MultiVoice-TwoVoicesOnStaff-Lyrics.xml": {
+    "fixture_xml": "42a-MultiVoice-TwoVoicesOnStaff-Lyrics.xml",
+    "golden_stem": "42a_multivoice_twovoicesonstaff_lyrics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      210
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/42a_multivoice_twovoicesonstaff_lyrics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x210, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "42b-MultiVoice-MidMeasureClefChange.xml": {
+    "fixture_xml": "42b-MultiVoice-MidMeasureClefChange.xml",
+    "golden_stem": "42b_multivoice_midmeasureclefchange",
+    "status": "approved",
+    "reference_size": [
+      635,
+      182
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/42b_multivoice_midmeasureclefchange_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x182, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43a-PianoStaff.xml": {
+    "fixture_xml": "43a-PianoStaff.xml",
+    "golden_stem": "43a_pianostaff",
+    "status": "approved",
+    "reference_size": [
+      635,
+      143
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43a_pianostaff_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x143, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43b-MultiStaff-DifferentKeys.xml": {
+    "fixture_xml": "43b-MultiStaff-DifferentKeys.xml",
+    "golden_stem": "43b_multistaff_differentkeys",
+    "status": "approved",
+    "reference_size": [
+      635,
+      143
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43b_multistaff_differentkeys_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x143, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43c-MultiStaff-DifferentKeysAfterBackup.xml": {
+    "fixture_xml": "43c-MultiStaff-DifferentKeysAfterBackup.xml",
+    "golden_stem": "43c_multistaff_differentkeysafterbackup",
+    "status": "approved",
+    "reference_size": [
+      635,
+      198
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43c_multistaff_differentkeysafterbackup_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x198, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43d-MultiStaff-StaffChange.xml": {
+    "fixture_xml": "43d-MultiStaff-StaffChange.xml",
+    "golden_stem": "43d_multistaff_staffchange",
+    "status": "approved",
+    "reference_size": [
+      635,
+      209
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43d_multistaff_staffchange_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x209, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43e-Multistaff-ClefDynamics.xml": {
+    "fixture_xml": "43e-Multistaff-ClefDynamics.xml",
+    "golden_stem": "43e_multistaff_clefdynamics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      359
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43e_multistaff_clefdynamics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x359, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43f-MultiStaff-Lyrics.xml": {
+    "fixture_xml": "43f-MultiStaff-Lyrics.xml",
+    "golden_stem": "43f_multistaff_lyrics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      189
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43f_multistaff_lyrics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x189, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "43g-MultiStaff-PartSymbol.xml": {
+    "fixture_xml": "43g-MultiStaff-PartSymbol.xml",
+    "golden_stem": "43g_multistaff_partsymbol",
+    "status": "approved",
+    "reference_size": [
+      635,
+      235
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/43g_multistaff_partsymbol_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x235, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45a-SimpleRepeat.xml": {
+    "fixture_xml": "45a-SimpleRepeat.xml",
+    "golden_stem": "45a_simplerepeat",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45a_simplerepeat_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45b-RepeatWithAlternatives.xml": {
+    "fixture_xml": "45b-RepeatWithAlternatives.xml",
+    "golden_stem": "45b_repeatwithalternatives",
+    "status": "approved",
+    "reference_size": [
+      635,
+      95
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45b_repeatwithalternatives_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x95, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45c-SimpleRepeat-Nested.xml": {
+    "fixture_xml": "45c-SimpleRepeat-Nested.xml",
+    "golden_stem": "45c_simplerepeat_nested",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45c_simplerepeat_nested_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45d-Repeats-MultipleEndings.xml": {
+    "fixture_xml": "45d-Repeats-MultipleEndings.xml",
+    "golden_stem": "45d_repeats_multipleendings",
+    "status": "approved",
+    "reference_size": [
+      635,
+      203
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45d_repeats_multipleendings_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x203, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45e-Repeats-Combination.xml": {
+    "fixture_xml": "45e-Repeats-Combination.xml",
+    "golden_stem": "45e_repeats_combination",
+    "status": "approved",
+    "reference_size": [
+      635,
+      203
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45e_repeats_combination_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x203, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45f-Repeats-InvalidEndings.xml": {
+    "fixture_xml": "45f-Repeats-InvalidEndings.xml",
+    "golden_stem": "45f_repeats_invalidendings",
+    "status": "approved",
+    "reference_size": [
+      635,
+      95
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45f_repeats_invalidendings_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x95, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45g-Repeats-NotEnded.xml": {
+    "fixture_xml": "45g-Repeats-NotEnded.xml",
+    "golden_stem": "45g_repeats_notended",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45g_repeats_notended_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45h-Repeats-Partial.xml": {
+    "fixture_xml": "45h-Repeats-Partial.xml",
+    "golden_stem": "45h_repeats_partial",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45h_repeats_partial_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "45i-Repeats-Nested.xml": {
+    "fixture_xml": "45i-Repeats-Nested.xml",
+    "golden_stem": "45i_repeats_nested",
+    "status": "approved",
+    "reference_size": [
+      635,
+      180
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/45i_repeats_nested_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x180, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46a-Barlines.xml": {
+    "fixture_xml": "46a-Barlines.xml",
+    "golden_stem": "46a_barlines",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46a_barlines_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46b-MidmeasureBarline.xml": {
+    "fixture_xml": "46b-MidmeasureBarline.xml",
+    "golden_stem": "46b_midmeasurebarline",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46b_midmeasurebarline_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46c-Midmeasure-Clef.xml": {
+    "fixture_xml": "46c-Midmeasure-Clef.xml",
+    "golden_stem": "46c_midmeasure_clef",
+    "status": "approved",
+    "reference_size": [
+      635,
+      86
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46c_midmeasure_clef_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x86, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46d-PickupMeasure-ImplicitMeasures.xml": {
+    "fixture_xml": "46d-PickupMeasure-ImplicitMeasures.xml",
+    "golden_stem": "46d_pickupmeasure_implicitmeasures",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46d_pickupmeasure_implicitmeasures_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46e-PickupMeasure-SecondVoiceStartsLater.xml": {
+    "fixture_xml": "46e-PickupMeasure-SecondVoiceStartsLater.xml",
+    "golden_stem": "46e_pickupmeasure_secondvoicestartslater",
+    "status": "approved",
+    "reference_size": [
+      635,
+      96
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46e_pickupmeasure_secondvoicestartslater_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x96, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46f-IncompleteMeasures.xml": {
+    "fixture_xml": "46f-IncompleteMeasures.xml",
+    "golden_stem": "46f_incompletemeasures",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46f_incompletemeasures_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "46g-PickupMeasure-Chordnames-FiguredBass.xml": {
+    "fixture_xml": "46g-PickupMeasure-Chordnames-FiguredBass.xml",
+    "golden_stem": "46g_pickupmeasure_chordnames_figuredbass",
+    "status": "approved",
+    "reference_size": [
+      635,
+      84
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/46g_pickupmeasure_chordnames_figuredbass_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x84, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "51b-Header-Quotes.xml": {
+    "fixture_xml": "51b-Header-Quotes.xml",
+    "golden_stem": "51b_header_quotes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/51b_header_quotes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "51c-MultipleRights.xml": {
+    "fixture_xml": "51c-MultipleRights.xml",
+    "golden_stem": "51c_multiplerights",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/51c_multiplerights_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "51d-EmptyTitle.xml": {
+    "fixture_xml": "51d-EmptyTitle.xml",
+    "golden_stem": "51d_emptytitle",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/51d_emptytitle_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "52a-PageLayout.xml": {
+    "fixture_xml": "52a-PageLayout.xml",
+    "golden_stem": "52a_pagelayout",
+    "status": "approved",
+    "reference_size": [
+      635,
+      172
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/52a_pagelayout_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x172, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "52b-Breaks.xml": {
+    "fixture_xml": "52b-Breaks.xml",
+    "golden_stem": "52b_breaks",
+    "status": "approved",
+    "reference_size": [
+      635,
+      242
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/52b_breaks_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x242, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61a-Lyrics.xml": {
+    "fixture_xml": "61a-Lyrics.xml",
+    "golden_stem": "61a_lyrics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      86
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61a_lyrics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x86, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61b-MultipleLyrics.xml": {
+    "fixture_xml": "61b-MultipleLyrics.xml",
+    "golden_stem": "61b_multiplelyrics",
+    "status": "approved",
+    "reference_size": [
+      635,
+      122
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61b_multiplelyrics_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x122, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61c-Lyrics-Pianostaff.xml": {
+    "fixture_xml": "61c-Lyrics-Pianostaff.xml",
+    "golden_stem": "61c_lyrics_pianostaff",
+    "status": "approved",
+    "reference_size": [
+      635,
+      151
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61c_lyrics_pianostaff_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x151, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61d-Lyrics-Melisma.xml": {
+    "fixture_xml": "61d-Lyrics-Melisma.xml",
+    "golden_stem": "61d_lyrics_melisma",
+    "status": "approved",
+    "reference_size": [
+      635,
+      85
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61d_lyrics_melisma_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x85, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61e-Lyrics-Chords.xml": {
+    "fixture_xml": "61e-Lyrics-Chords.xml",
+    "golden_stem": "61e_lyrics_chords",
+    "status": "approved",
+    "reference_size": [
+      635,
+      88
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61e_lyrics_chords_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x88, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61f-Lyrics-GracedNotes.xml": {
+    "fixture_xml": "61f-Lyrics-GracedNotes.xml",
+    "golden_stem": "61f_lyrics_gracednotes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      90
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61f_lyrics_gracednotes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x90, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61g-Lyrics-NameNumber.xml": {
+    "fixture_xml": "61g-Lyrics-NameNumber.xml",
+    "golden_stem": "61g_lyrics_namenumber",
+    "status": "approved",
+    "reference_size": [
+      635,
+      101
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61g_lyrics_namenumber_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x101, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61h-Lyrics-BeamsMelismata.xml": {
+    "fixture_xml": "61h-Lyrics-BeamsMelismata.xml",
+    "golden_stem": "61h_lyrics_beamsmelismata",
+    "status": "approved",
+    "reference_size": [
+      635,
+      185
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61h_lyrics_beamsmelismata_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x185, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61i-Lyrics-Chords.xml": {
+    "fixture_xml": "61i-Lyrics-Chords.xml",
+    "golden_stem": "61i_lyrics_chords",
+    "status": "approved",
+    "reference_size": [
+      635,
+      123
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61i_lyrics_chords_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x123, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61j-Lyrics-Elisions.xml": {
+    "fixture_xml": "61j-Lyrics-Elisions.xml",
+    "golden_stem": "61j_lyrics_elisions",
+    "status": "approved",
+    "reference_size": [
+      635,
+      87
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61j_lyrics_elisions_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x87, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "61k-Lyrics-SpannersExtenders.xml": {
+    "fixture_xml": "61k-Lyrics-SpannersExtenders.xml",
+    "golden_stem": "61k_lyrics_spannersextenders",
+    "status": "approved",
+    "reference_size": [
+      635,
+      85
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/61k_lyrics_spannersextenders_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x85, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71a-Chordnames.xml": {
+    "fixture_xml": "71a-Chordnames.xml",
+    "golden_stem": "71a_chordnames",
+    "status": "approved",
+    "reference_size": [
+      635,
+      86
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71a_chordnames_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x86, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71c-ChordsFrets.xml": {
+    "fixture_xml": "71c-ChordsFrets.xml",
+    "golden_stem": "71c_chordsfrets",
+    "status": "approved",
+    "reference_size": [
+      635,
+      298
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71c_chordsfrets_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x298, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71d-ChordsFrets-Multistaff.xml": {
+    "fixture_xml": "71d-ChordsFrets-Multistaff.xml",
+    "golden_stem": "71d_chordsfrets_multistaff",
+    "status": "approved",
+    "reference_size": [
+      635,
+      284
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71d_chordsfrets_multistaff_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x284, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71e-TabStaves.xml": {
+    "fixture_xml": "71e-TabStaves.xml",
+    "golden_stem": "71e_tabstaves",
+    "status": "approved",
+    "reference_size": [
+      635,
+      128
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71e_tabstaves_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x128, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71f-AllChordTypes.xml": {
+    "fixture_xml": "71f-AllChordTypes.xml",
+    "golden_stem": "71f_allchordtypes",
+    "status": "approved",
+    "reference_size": [
+      635,
+      442
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71f_allchordtypes_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x442, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "71g-MultipleChordnames.xml": {
+    "fixture_xml": "71g-MultipleChordnames.xml",
+    "golden_stem": "71g_multiplechordnames",
+    "status": "approved",
+    "reference_size": [
+      635,
+      84
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/71g_multiplechordnames_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x84, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "72a-TransposingInstruments.xml": {
+    "fixture_xml": "72a-TransposingInstruments.xml",
+    "golden_stem": "72a_transposinginstruments",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/72a_transposinginstruments_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "72b-TransposingInstruments-Full.xml": {
+    "fixture_xml": "72b-TransposingInstruments-Full.xml",
+    "golden_stem": "72b_transposinginstruments_full",
+    "status": "approved",
+    "reference_size": [
+      635,
+      76
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/72b_transposinginstruments_full_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x76, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "72c-TransposingInstruments-Change.xml": {
+    "fixture_xml": "72c-TransposingInstruments-Change.xml",
+    "golden_stem": "72c_transposinginstruments_change",
+    "status": "approved",
+    "reference_size": [
+      635,
+      157
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/72c_transposinginstruments_change_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "73a-Percussion.xml": {
+    "fixture_xml": "73a-Percussion.xml",
+    "golden_stem": "73a_percussion",
+    "status": "approved",
+    "reference_size": [
+      635,
+      65
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/73a_percussion_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x65, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "74a-FiguredBass.xml": {
+    "fixture_xml": "74a-FiguredBass.xml",
+    "golden_stem": "74a_figuredbass",
+    "status": "approved",
+    "reference_size": [
+      635,
+      72
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/74a_figuredbass_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "75a-AccordionRegistrations.xml": {
+    "fixture_xml": "75a-AccordionRegistrations.xml",
+    "golden_stem": "75a_accordionregistrations",
+    "status": "approved",
+    "reference_size": [
+      635,
+      185
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/75a_accordionregistrations_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x185, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "90a-Compressed-MusicXML.mxl": {
+    "fixture_xml": "90a-Compressed-MusicXML.mxl",
+    "golden_stem": "90a_compressed_musicxml",
+    "status": "approved",
+    "reference_size": [
+      635,
+      76
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/90a_compressed_musicxml_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x76, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "99a-Sibelius5-IgnoreBeaming.xml": {
+    "fixture_xml": "99a-Sibelius5-IgnoreBeaming.xml",
+    "golden_stem": "99a_sibelius5_ignorebeaming",
+    "status": "approved",
+    "reference_size": [
+      635,
+      115
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/99a_sibelius5_ignorebeaming_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x115, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  },
+  "99b-Lyrics-BeamsMelismata-IgnoreBeams.xml": {
+    "fixture_xml": "99b-Lyrics-BeamsMelismata-IgnoreBeams.xml",
+    "golden_stem": "99b_lyrics_beamsmelismata_ignorebeams",
+    "status": "approved",
+    "reference_size": [
+      635,
+      185
+    ],
+    "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/99b_lyrics_beamsmelismata_ignorebeams_635.png",
+    "last_candidate": null,
+    "note": "Phase 1: alphaTab golden (635x185, padding=[7,0,7,0])",
+    "updated_at": "2026-03-09T03:51:55+00:00"
+  }
+}

@@ -2,6 +2,120 @@
 
 This log records autonomous implementation changes across milestones M0-M20.
 
+## 2026-03-09T05:15:00Z - M10 - Status Updated To BROKEN After Post-Fix Layout Changes
+- Files: android/docs/AGENT_PROGRESS.md, android/docs/AGENT_ISSUES.md, android/docs/AGENT_CHANGELOG.md
+- Behavior: Updated autonomous tracking state to mark current M10 execution as BROKEN.
+  Documented active blocker and latest targeted visual mismatch metrics after recent
+  opening-spacing/time-signature alignment changes:
+  - 01a: 64.90%
+  - 01b: 64.52%
+  - 01c: 70.40%
+  Also captured that 01c width moved in the intended direction (~148.61px to ~130.49px)
+  while overall conformance remains broken.
+- Verification:
+  `MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml,01b-Pitches-Intervals.xml,01c-Pitches-NoVoiceElement.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest` -> FAIL (3/3)
+- Risk: LOW
+- Rollback: Revert the three tracking files if status wording needs to be reset.
+
+## 2026-03-09T00:30:00Z - M10 - Adopt Full W3C MusicXML Test Suite as NoteWise Conformance Target
+- Files:
+  android/reference/alphaTab-develop/packages/alphatab/test/visualTests/features/MusicXMLTestSuite.test.ts,
+  android/reference/alphaTab-develop/packages/alphatab/test-data/visual-tests/musicxml-testsuite/{150 XML + 150 PNG},
+  android/NoteWise/app/src/test/java/dev/pola/notewise/visual/MusicXMLSuiteVisualTest.kt,
+  android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/{150 PNG + approval_manifest.json}
+- Behavior: Expanded visual conformance suite from 5 Tier-1 fixtures to all 150
+  W3C MusicXML Test Suite fixtures. alphaTab renders generated at 635px (634px
+  for 11a); accepted as goldens. MusicXMLTestSuite.test.ts added to alphaTab test
+  suite (150/150 pass). MusicXMLSuiteVisualTest.kt added to NoteWise with: parse-error
+  skip (no crash for unsupported formats), aggregate failure report (all 150 fixtures
+  run in one pass even when some fail), 1.0% YIQ pixel-diff tolerance throughout.
+  Phase 1 baseline: ran=150 skipped=0 failures=150 (all fail due to layout density gap).
+  MXL compressed format (90a) parsed and rendered successfully.
+  Note: 5 near-blank failures (41i/j/k/l, 72c) — PartNameDisplay/TransposingChange
+  fixtures that produce only a barline line in NoteWise's current parse output.
+- Risk: LOW
+
+## 2026-03-08T23:45:00Z - M10 - Wire alphaTab Goldens As NoteWise Phase 1 Reference
+- Files:
+  android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/{01a_pitches_pitches,01b_pitches_intervals,11a_time_signatures_634,12aa_clefs_pitch_traditional,13a_key_signatures}_635.png,
+  android/NoteWise/app/src/test/resources/visual-goldens/lilypond/tier1/approval_manifest.json,
+  android/NoteWise/app/src/test/java/dev/pola/notewise/visual/LilyPondTier1VisualTest.kt,
+  android/NoteWise/app/src/test/java/dev/pola/notewise/visual/VisualGoldenAssert.kt
+- Behavior: Completed Phase 1 adoption (DEC-026). Copied all 5 Tier-1 alphaTab
+  golden PNGs into NoteWise golden dir. Updated approval_manifest.json reference_size
+  heights to alphaTab's actual heights (01a:1513, 01b:1399, 11a:322, 12aa:153, 13a:872).
+  Updated all fixture tolerances from 2.8/2.6 to 1.0 (Phase 1 standard).
+  Updated VisualGoldenAssert.kt to use YIQ perceptual comparison (threshold=0.3,
+  maxDeltaSq=3169.35) with opaquePixels denominator (excludes white background).
+  Phase 1 baseline confirmed: 01a diff=97.31% at 635×1513 — sizes match, high diff
+  reflects packing density gap (NoteWise 6 rows vs alphaTab 4 rows).
+- Risk: LOW — layout improvements will close diff progressively
+
+## 2026-03-08T23:00:00Z - M10 - Adopt Two-Phase Visual Conformance Strategy
+- Files: android/ANDROID_PROJECT_PLAN.md, android/IMPLEMENTATION_SPEC.md,
+  android/docs/AGENT_PROGRESS.md, android/docs/AGENT_DECISIONS.md,
+  tools/lilypond_progressive_golden_workflow.py,
+  android/reference/alphaTab-develop/packages/alphatab/test/visualTests/features/LilyPondMusicXML.test.ts
+- Behavior: Replaced "LilyPond-style visual test strategy" with a formal two-phase
+  conformance plan. Phase 1: alphaTab renders are the golden reference target with
+  1% YIQ pixel-diff tolerance (mirrors alphaTab's own PixelMatch/VisualTestHelper).
+  Phase 2: improve note-spacing density toward LilyPond/MuseScore after Phase 1 passes.
+  alphaTab test suite bootstrapped (Node.js installed, LilyPondMusicXML.test.ts created).
+  3-way review panels (LilyPond | alphaTab | NoteWise) wired into `generate-panels` command.
+  Time signature `symbol="common"` bug fixed (ignores symbol attribute when beats≠4/4).
+- Risk: LOW
+
+## 2026-03-08T22:30:00Z - M10 - Fix Time Signature symbol=common Parsed As Common Time
+- Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/parser/MusicXMLParser.kt
+- Behavior: MusicXMLParser unconditionally mapped `<time symbol="common">` to "C"
+  display. For 2/4 time (01b-Pitches-Intervals.xml), this rendered common time (C)
+  instead of "2/4". Fix: validate symbol ("C" only if beats==4 and beat-type==4;
+  "C|" only if beats==2 and beat-type==2); otherwise fall back to numeric display.
+- Risk: LOW
+
+## 2026-03-08T22:00:00Z - M10 - naturalWidth Missing clefInjectionExtra In Compact Last Row
+- Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt
+- Behavior: Path C (ragged last row) computed `naturalWidth = sum(estimateMinWidth)`
+  without adding `computeClefInjectionExtra(row)`. This caused the last row to
+  underestimate its required width, triggering compression that left only 127px for
+  a measure needing 153px. The last note (C#) overflowed the right barline.
+  Fix: add `computeClefInjectionExtra(currentRow)` to naturalWidth in Path C.
+- Risk: LOW
+
+## 2026-03-08T21:50:00Z - M10 - Right Safety Uses Barline Geometry Instead Of Heuristic
+- Files: VFLineBreaker.kt, VFFormatter.kt, VFBarline.kt
+- Behavior: Replaced `stave.spacingBetweenLines * 0.4f` (2.8px) rightSafety with
+  `(stave.endBarline?.leftExtentPx() ?: 0f) + 2f` (9.75px for END barline). Added
+  `VFBarline.leftExtentPx()` method computing the leftmost visual pixel from anchor
+  for each barline type.
+- Risk: LOW
+- Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt
+- Behavior: `relayoutRow` injected a clef into the first measure of rows 2+ after `minWidths` were already computed without that overhead. Notes overflowed the right barline in the first measure of each non-first row (measures 7, 13, 18, 23). Fix: compute `clefInjectionExtra` (glyph bbox width + one boundary spacing) from the first source stave's resolved clef type and add it to `minWidths[0]` before proportional expansion. The fix is scoped to `relayoutRow` (not the packing loop in `layout()`) so row count is preserved while per-measure width budgets are accurate.
+- Verification: Candidate `android/NoteWise/app/build/reports/visual-tests/lilypond/tier1/01a_pitches_pitches_635.new.png` regenerated; visually confirmed notes no longer overflow barlines at measure 7, 13, 18, 23.
+- Risk: LOW
+- Rollback: Revert `VFLineBreaker.kt` to restore previous `relayoutRow` without `clefInjectionExtra`.
+
+## 2026-03-08T18:20:00Z - M10 - Remove Top-Of-Canvas Gap From Visual Test Default StartY
+- Files: android/NoteWise/app/src/test/java/dev/pola/notewise/visual/LilyPondTier1VisualTest.kt
+- Behavior: `startY` was defaulting to `8f`, anchoring the first row's content bbox at Y=8px and creating a ~1 staff-space blank gap at the top of the canvas. Changed `parseStartYFromEnv(default = 8f)` to `parseStartYFromEnv(default = 0f)` so the first staff content aligns at the canvas top edge, matching LilyPond's minimal top margin.
+- Verification: Candidate `01a_pitches_pitches_635.new.png` regenerated; top gap eliminated and content starts at canvas top.
+- Risk: LOW
+- Rollback: Revert `LilyPondTier1VisualTest.kt` to restore `default = 8f`.
+
+## 2026-03-08T18:10:00Z - M10 - Add Four-Quarter Estimator Fast Path For Tighter Row Packing
+- Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt
+- Behavior: `estimateStaffNoteAreaWidth` used a chain formula with `minTickGap = 10f` between every pair of consecutive tick contexts, adding 30px overhead for any 4-note measure. The formatter's `applyFourQuarterGridIfApplicable` allows `separation ≥ 0` (minimum 0). Added a fast path that detects exactly 4 equal-quarter-note tick contexts and mirrors the formatter formula (`sum(noteheadWidths) + sum(accidentalExtraLeft)`) without any inter-note gap. Row packing improved from [6,5,4,4,4,5] (6 rows) to [6,6,5,5,6] (5 rows), matching LilyPond's 5-row layout for `01a-Pitches-Pitches.xml`.
+- Verification: Candidate `01a_pitches_pitches_635.new.png` regenerated; confirmed 5-row layout (was 6).
+- Risk: LOW
+- Rollback: Revert `VFLineBreaker.kt` to restore chain-formula-only estimation.
+
+## 2026-03-08T18:05:00Z - M10 - Tighten Accidental-To-Notehead Gap To Standard Engraving Value
+- Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/model/VFStaveNote.kt
+- Behavior: The `noteGap` (gap between accidental and notehead edge) was `spacing * 0.5f` (~3.5px at spacing=7), approximately 3-4x the standard music engraving value. Reduced to `spacing * 0.1f` (~0.7px) in both `accidentalSpanPx()` and `accidentalColumnCenters()`. Each sharped measure's note-area estimate shrank by ~11px, allowing the row packing loop to fit more measures per row.
+- Verification: Candidate `01a_pitches_pitches_635.new.png` regenerated; accidentals visually closer to noteheads and packing density improved.
+- Risk: LOW
+- Rollback: Revert `VFStaveNote.kt` to restore `spacing * 0.5f` gap.
+
 ## 2026-03-08T05:38:00Z - M10 - Accidental To Notehead Spacing Uses Staff-Space Layout
 - Files: android/NoteWise/app/src/main/java/dev/pola/vexflow/model/VFStaveNote.kt, android/NoteWise/app/src/test/java/dev/pola/vexflow/model/VFStaveNoteTest.kt
 - Behavior: Replaced hardcoded accidental x-offset/column spacing with staff-space + glyph-bbox-based placement (`0.5 * staffSpace` note gap and column gap), reducing excessive accidental distance from noteheads in LilyPond fixture renders.

@@ -2,6 +2,26 @@
 
 Track defects, blockers, and mitigations discovered during autonomous delivery.
 
+## ISSUE-013 - Post-Fix MusicXML Visual Regression (Status: Broken)
+- Status: OPEN
+- Severity: S1
+- Milestone: M10
+- Type: TEST
+- Symptoms: After applying opening-padding/time-signature alignment changes, targeted
+	fixtures `01a/01b/01c` all fail visual conformance against current approved goldens.
+	Latest diffs: `01a=64.90%`, `01b=64.52%`, `01c=70.40%`.
+- Root cause: Recent horizontal-layout calibration moved geometry in the intended
+	direction for 01c width, but current aggregate placement remains incompatible with
+	the currently approved musicxml-suite baseline.
+- Fix: IN_PROGRESS. Keep the new diagnostic changes, review post-fix renders,
+	and either (a) continue calibration toward visual convergence, or (b) rollback if
+	convergence is not reached quickly.
+- Verification:
+	`MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml,01b-Pitches-Intervals.xml,01c-Pitches-NoVoiceElement.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest`
+	-> FAIL (3/3) with metrics above.
+- Follow-up: Do not promote new goldens while ISSUE-013 remains open; use review PNGs in
+	`app/build/reports/visual-tests/lilypond/review/` for sign-off.
+
 ## ISSUE-012 - Wide Single-Staff Scores Misclassified As Virtual Grand Staff
 - Status: RESOLVED
 - Severity: S2

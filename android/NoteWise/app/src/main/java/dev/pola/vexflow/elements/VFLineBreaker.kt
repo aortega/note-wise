@@ -11,6 +11,10 @@ import dev.pola.vexflow.model.VFMetrics
  */
 object VFLineBreaker {
 
+    // Compact 2/4-like opening bars (for example MusicXML testsuite 01b) need a
+    // small packing slack so the first row can host one extra bar before compression.
+    private const val COMPACT_OPENING_PACKING_SLACK_PX = 12f
+
     private fun measureRightSafetySpaces(): Float {
         val raw = System.getenv("LILYPOND_MEASURE_RIGHT_SAFETY_SPACES")?.trim().orEmpty()
         val parsed = raw.toFloatOrNull()
@@ -44,7 +48,7 @@ object VFLineBreaker {
         systemWidth: Float,
         startX: Float,
         startY: Float,
-        systemSpacing: Float = 80f,
+        systemSpacing: Float = 0f,
         firstSystemTargetMeasures: Int? = null
     ): SystemLayout {
         if (measures.isEmpty()) {
@@ -82,8 +86,12 @@ object VFLineBreaker {
         }
 
         for (measure in measures.drop(firstSystemCount)) {
-            val measureMinWidth = estimateMinWidth(measure)
-            if (currentRow.isNotEmpty() && currentWidth + measureMinWidth > systemWidth) {
+            var packingWidth = estimatePackingWidthForLineBreak(
+                measure = measure,
+                isRowStart = currentRow.isEmpty(),
+                isFirstRowStart = packedRows.isEmpty() && currentRow.isEmpty() && firstSystemCount == 0
+            )
+            if (currentRow.isNotEmpty() && currentWidth + packingWidth > systemWidth) {
                 val (placed, bounds) = placeRow(
                     row = currentRow.toList(),
                     startX = startX,
@@ -99,10 +107,17 @@ object VFLineBreaker {
                 currentWidth = 0f
                 currentY = bounds.bottom
                 previousRowBounds = bounds
+
+                // Re-evaluate as the first measure in the next row.
+                packingWidth = estimatePackingWidthForLineBreak(
+                    measure = measure,
+                    isRowStart = true,
+                    isFirstRowStart = false
+                )
             }
 
             currentRow += measure
-            currentWidth += measureMinWidth
+            currentWidth += packingWidth
         }
 
         if (currentRow.isNotEmpty()) {
@@ -317,6 +332,37 @@ object VFLineBreaker {
     private fun estimateWeight(measure: MusicSheetToVF.RenderedMeasure): Float {
         val noteCount = measure.totalNoteCount()
         return noteCount.coerceAtLeast(1).toFloat()
+    }
+
+    private fun estimatePackingWidthForLineBreak(
+        measure: MusicSheetToVF.RenderedMeasure,
+        isRowStart: Boolean,
+        isFirstRowStart: Boolean
+    ): Float {
+        var width = estimateMinWidth(measure)
+
+        // When a row starts with a bar that originally had no clef, relayoutRow injects one.
+        // Include this here too so packing decisions match actual rendered row widths.
+        if (isRowStart && isCompactMeasure(measure)) {
+            width += computeClefInjectionExtra(listOf(measure))
+        }
+
+        // First compact opening bar tends to be conservatively overestimated; allow a small
+        // slack so row 1 can pack like alphaTab before proportional compression is applied.
+        if (isFirstRowStart && measure.measureNumber == 1 && isCompactMeasure(measure)) {
+            width -= COMPACT_OPENING_PACKING_SLACK_PX
+        }
+
+        return width.coerceAtLeast(0f)
+    }
+
+    private fun isCompactMeasure(measure: MusicSheetToVF.RenderedMeasure): Boolean {
+        val expectedTicks = measure.staves
+            .flatMap { it.voices }
+            .map { it.getExpectedTotalTicks().doubleValue }
+
+        val smallestExpected = expectedTicks.minOrNull() ?: return false
+        return smallestExpected <= 0.5
     }
 
     private fun estimateMinWidth(measure: MusicSheetToVF.RenderedMeasure): Float {
@@ -592,14 +638,8 @@ object VFLineBreaker {
     private fun accidentalGlyphName(key: String): String? {
         val pitch = key.substringBefore('/').lowercase()
         if (pitch.length <= 1) return null
-        return when (pitch.substring(1)) {
-            "#" -> "accidentalSharp"
-            "b" -> "accidentalFlat"
-            "n" -> "accidentalNatural"
-            "##" -> "accidentalDoubleSharp"
-            "bb" -> "accidentalDoubleFlat"
-            else -> null
-        }
+        val suffix = pitch.substring(1)
+        return VFAccidental.AccidentalType.fromString(suffix)?.glyphName
     }
 
     private fun safeGlyphBoundingBox(glyphName: String) =
@@ -609,7 +649,7 @@ object VFLineBreaker {
         val pitch = key.substringBefore('/')
         if (pitch.length <= 1) return false
         val suffix = pitch.substring(1)
-        return suffix == "#" || suffix == "b" || suffix == "n" || suffix == "##" || suffix == "bb"
+        return VFAccidental.AccidentalType.fromString(suffix) != null
     }
 
     private fun cloneStave(source: VFStave, x: Float, y: Float, width: Float): VFStave {

@@ -3494,6 +3494,7 @@ import java.util.zip.ZipInputStream
  *   - Slurs (encoded as <notation><slur type="start/stop">)
  *   - Dynamics (encoded as <direction><dynamics>)
  *   - Repeats (encoded as <barline><repeat direction="forward/backward">)
+ *   - Lyrics (encoded as <lyric><syllabic><text>) — Phase B feature
  *   - Score-timewise format (use score-partwise only)
  *
  * MXL format: a ZIP file containing a rootfile (usually named score.xml or similar).

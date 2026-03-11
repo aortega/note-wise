@@ -20,6 +20,17 @@ object VFTables {
     const val GLYPH_ACCIDENTAL_NATURAL: Int = 0xE261
     const val GLYPH_ACCIDENTAL_DOUBLE_SHARP: Int = 0xE263
     const val GLYPH_ACCIDENTAL_DOUBLE_FLAT: Int = 0xE264
+    const val GLYPH_ACCIDENTAL_PARENS_LEFT: Int = 0xE26A
+    const val GLYPH_ACCIDENTAL_PARENS_RIGHT: Int = 0xE26B
+    const val GLYPH_ACCIDENTAL_BRACKET_LEFT: Int = 0xE26C
+    const val GLYPH_ACCIDENTAL_BRACKET_RIGHT: Int = 0xE26D
+    // Microtone accidentals (SMuFL)
+    // Use non-arrow 24-EDO Stein/Zimmermann glyphs for quarter-tone accidentals.
+    const val GLYPH_ACCIDENTAL_QUARTER_FLAT: Int = 0xE280
+    const val GLYPH_ACCIDENTAL_QUARTER_SHARP: Int = 0xE282
+    const val GLYPH_ACCIDENTAL_HALF_SHARP: Int = 0xE282
+    const val GLYPH_ACCIDENTAL_THREE_QUARTER_FLAT: Int = 0xE281
+    const val GLYPH_ACCIDENTAL_THREE_QUARTER_SHARP: Int = 0xE283
 
     const val GLYPH_REST_WHOLE: Int = 0xE4E3
     const val GLYPH_REST_HALF: Int = 0xE4E4

@@ -1,6 +1,7 @@
 package dev.pola.vexflow.parser
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,5 +106,72 @@ class MusicXMLParserTest {
     @Test
     fun `MusicSheetToVF pitchToKey infers natural C in FIFTHS-11`() {
         assertEquals("cn/4", MusicSheetToVF.pitchToKey(Pitch("C", 4, 0f), null, -11))
+    }
+
+    @Test
+    fun `MusicSheetToVF pitchToKey infers microtone accidental suffixes`() {
+        assertEquals("cdb/4", MusicSheetToVF.pitchToKey(Pitch("C", 4, -1.5f), null, 0))
+        assertEquals("dqb/4", MusicSheetToVF.pitchToKey(Pitch("D", 4, -0.5f), null, 0))
+        assertEquals("eqs/4", MusicSheetToVF.pitchToKey(Pitch("E", 4, 0.5f), null, 0))
+        assertEquals("f#t/4", MusicSheetToVF.pitchToKey(Pitch("F", 4, 1.5f), null, 0))
+    }
+
+    @Test
+    fun `microtone explicit accidental tags are parsed`() {
+        val xml = """<measure number='1'>
+<attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign></clef></attributes>
+<note><pitch><step>D</step><octave>4</octave><alter>-0.5</alter></pitch><duration>1</duration><voice>1</voice><accidental>quarter-flat</accidental></note>
+<note><pitch><step>F</step><octave>4</octave><alter>1.5</alter></pitch><duration>1</duration><voice>1</voice><accidental>three-quarters-sharp</accidental></note>
+</measure>"""
+        val notes = xmlSheet(xml).parts[0].measures[0].notes
+
+        assertEquals("qb", (notes[0] as NoteData).accidental)
+        assertEquals("#t", (notes[1] as NoteData).accidental)
+    }
+
+    @Test
+    fun `accidental display attributes are parsed`() {
+        val xml = """<measure number='1'>
+<attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign></clef></attributes>
+<note><pitch><step>D</step><octave>4</octave><alter>-1</alter></pitch><duration>1</duration><voice>1</voice><accidental cautionary='yes'>flat</accidental></note>
+<note><pitch><step>D</step><octave>4</octave><alter>-1</alter></pitch><duration>1</duration><voice>1</voice><accidental editorial='yes'>flat</accidental></note>
+<note><pitch><step>C</step><octave>4</octave><alter>1</alter></pitch><duration>1</duration><voice>1</voice><accidental cautionary='yes' parentheses='no'>sharp</accidental></note>
+<note><pitch><step>D</step><octave>4</octave><alter>-2</alter></pitch><duration>1</duration><voice>1</voice><accidental editorial='yes' cautionary='yes'>flat-flat</accidental></note>
+<note><pitch><step>C</step><octave>4</octave><alter>2</alter></pitch><duration>1</duration><voice>1</voice><accidental bracket='yes' parentheses='yes'>double-sharp</accidental></note>
+</measure>"""
+
+        val notes = xmlSheet(xml).parts[0].measures[0].notes
+        
+        // cautionary alone -> parentheses by default
+        val cautionary = notes[0] as NoteData
+        assertTrue(cautionary.accidentalCautionary)
+        assertFalse(cautionary.accidentalEditorial)
+        assertTrue(cautionary.accidentalParenthesized)
+        assertFalse(cautionary.accidentalBracketed)
+
+        // editorial alone -> brackets by default
+        val editorial = notes[1] as NoteData
+        assertFalse(editorial.accidentalCautionary)
+        assertTrue(editorial.accidentalEditorial)
+        assertFalse(editorial.accidentalParenthesized)
+        assertTrue(editorial.accidentalBracketed)
+
+        // explicit parentheses='no' overrides default
+        val noParens = notes[2] as NoteData
+        assertTrue(noParens.accidentalCautionary)
+        assertFalse(noParens.accidentalParenthesized)
+        assertFalse(noParens.accidentalBracketed)
+
+        // both editorial and cautionary -> brackets only (brackets suppress parentheses)
+        val both = notes[3] as NoteData
+        assertTrue(both.accidentalCautionary)
+        assertTrue(both.accidentalEditorial)
+        assertFalse(both.accidentalParenthesized) // suppressed by bracket
+        assertTrue(both.accidentalBracketed)
+
+        // explicit bracket always suppresses parentheses
+        val bracketed = notes[4] as NoteData
+        assertTrue(bracketed.accidentalBracketed)
+        assertFalse(bracketed.accidentalParenthesized) // brackets suppress parens
     }
 }

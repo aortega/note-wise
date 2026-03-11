@@ -2,6 +2,28 @@
 
 This log records autonomous implementation changes across milestones M0-M20.
 
+## 2026-03-10T20:25:00Z - M10 - Share Rendered-Bounds Row Refinement Across Runtime And Visual Harness
+- Files:
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFRenderedRowSpacingRefiner.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/core/VexRenderingContext.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/view/MultiStaveSheetMusicView.kt,
+  android/NoteWise/app/src/test/java/dev/pola/notewise/visual/VisualRenderHarness.kt,
+  android/NoteWise/app/src/test/java/dev/pola/vexflow/core/VexRenderingContextTest.kt
+- Behavior: Added a shared rendered-bounds row-spacing refiner so runtime and visual tests
+  use the same inter-row vertical-spacing logic. `VexRenderingContext` now records bounds for
+  SMuFL glyphs plus drawn primitives (`stroke`, `fill`, `fillRect`, `strokeRect`) tagged by
+  measure/staff, and both runtime view + visual harness refine row placement from those bounds.
+- Verification:
+  `./gradlew :app:testDebugUnitTest --tests "*VFLineBreakerTest" --tests "*VexRenderingContextTest"` -> SUCCESS
+  `MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest` -> FAIL (`70.12%` diff)
+- Risk: MEDIUM
+- Rollback: Revert the five files listed above to remove the shared rendered-bounds refiner.
+  If full spacing rollback is needed for this session, also revert:
+  `android/NoteWise/app/src/main/java/dev/pola/vexflow/core/VFFormatter.kt`,
+  `android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt`,
+  `android/NoteWise/app/src/test/java/dev/pola/vexflow/core/VFFormatterTest.kt`,
+  `android/NoteWise/app/src/test/java/dev/pola/vexflow/elements/VFLineBreakerTest.kt`.
+
 ## 2026-03-09T05:15:00Z - M10 - Status Updated To BROKEN After Post-Fix Layout Changes
 - Files: android/docs/AGENT_PROGRESS.md, android/docs/AGENT_ISSUES.md, android/docs/AGENT_CHANGELOG.md
 - Behavior: Updated autonomous tracking state to mark current M10 execution as BROKEN.

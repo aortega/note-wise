@@ -58,6 +58,10 @@ data class NoteData(
     val slurEnd: Boolean = false,
     val beamState: BeamState = BeamState.NONE,
     val accidental: String? = null,
+    val accidentalCautionary: Boolean = false,
+    val accidentalEditorial: Boolean = false,
+    val accidentalParenthesized: Boolean = false,
+    val accidentalBracketed: Boolean = false,
     val notationType: String = "normal"
 ) : NoteOrRest()
 

@@ -8,6 +8,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import dev.pola.vexflow.core.VexRenderingContext
 import dev.pola.vexflow.elements.VFLineBreaker
+import dev.pola.vexflow.elements.VFRenderedRowSpacingRefiner
 import dev.pola.vexflow.elements.VFSystem
 import dev.pola.vexflow.parser.MusicSheetToVF
 
@@ -23,22 +24,9 @@ object VisualRenderHarness {
         fun rect(): RectF = RectF(left, top, right, bottom)
     }
 
-    private data class GlyphBBox(
-        val staffNumber: Int,
-        val left: Float,
-        val top: Float,
-        val right: Float,
-        val bottom: Float
-    ) {
-        fun rect(): RectF = RectF(left, top, right, bottom)
-
-        fun shifted(deltaY: Float): GlyphBBox =
-            copy(top = top + deltaY, bottom = bottom + deltaY)
-    }
-
     private data class RowRenderState(
         val measures: List<MusicSheetToVF.RenderedMeasure>,
-        val glyphBBoxes: List<GlyphBBox>
+        val glyphBBoxes: List<VFRenderedRowSpacingRefiner.StaffGlyphBounds>
     )
 
     private data class MeasureBBoxComparison(
@@ -56,7 +44,8 @@ object VisualRenderHarness {
         systemSpacing: Float = parseSystemSpacingFromEnv(default = -1f)
     ): Bitmap {
         val debugLayout = System.getenv("LILYPOND_DEBUG_LAYOUT")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
-        val debugRefineRows = System.getenv("LILYPOND_DEBUG_REFINE_ROWS")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
+        val disableMeasuredRowRefinement =
+            System.getenv("LILYPOND_DISABLE_ROW_REFINEMENT")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
         val showBarNumbers = System.getenv("LILYPOND_SHOW_BAR_NUMBERS")?.trim()?.lowercase() in setOf("1", "true", "yes", "on")
         // Gourlay spring-rod estimation now drives ALL rows (including the first) so that
         // NoteWise's line-breaking matches alphaTab's natural layout.  Set
@@ -71,9 +60,11 @@ object VisualRenderHarness {
         val leftMarginPx = 7f
         val startX = horizontalPadding + leftMarginPx
         val availableWidth = (widthPx.toFloat() - startX - leftMarginPx).coerceAtLeast(240f)
-        // System spacing: auto-computed as 6.4× staffSpacing when not overridden by env var.
-        // For 9px stave spacing this gives ≈57.6px, matching alphaTab's inter-row system-distance.
-        val actualSystemSpacing = if (systemSpacing >= 12f) systemSpacing else maxStaffSpacingPx * 6.4f
+        // Keep inter-system distance content-driven by default.
+        // AlphaTab's page layout uses small fixed system paddings (~10 px top/bottom) plus
+        // content overflows; it does not inject a 50+ px row gap. When no explicit override is
+        // supplied, let VFLineBreaker fall back to its minimum safe content gap.
+        val actualSystemSpacing = if (systemSpacing >= 0f) systemSpacing else 0f
 
         val layout = VFLineBreaker.layout(
             measures = measures,
@@ -84,13 +75,18 @@ object VisualRenderHarness {
             firstSystemTargetMeasures = firstSystemTargetMeasures
         )
 
-        val rowStates = if (debugLayout && debugRefineRows) {
-            refineRowsUsingGlyphBBoxes(
+        val compactOnlyLayout = measures.isNotEmpty() && measures.all { isCompactMeasure(it) }
+        val shouldRefineRows = !disableMeasuredRowRefinement && !compactOnlyLayout
+
+        val rowStates = if (shouldRefineRows) {
+            VFRenderedRowSpacingRefiner.refineRows(
                 rows = layout.rows,
                 widthPx = widthPx,
                 horizontalPadding = startX,
                 systemWidth = availableWidth
-            )
+            ).map { refined ->
+                RowRenderState(refined.measures, refined.glyphBounds)
+            }
         } else {
             layout.rows.map { row -> RowRenderState(measures = row, glyphBBoxes = emptyList()) }
         }
@@ -351,146 +347,6 @@ object VisualRenderHarness {
         }
     }
 
-    private fun refineRowsUsingGlyphBBoxes(
-        rows: List<List<MusicSheetToVF.RenderedMeasure>>,
-        widthPx: Int,
-        horizontalPadding: Float,
-        systemWidth: Float
-    ): List<RowRenderState> {
-        if (rows.isEmpty()) return emptyList()
-
-        val roughBottom = rows
-            .flatten()
-            .flatMap { it.staves }
-            .maxOfOrNull { it.stave.getBottomLineBottomY() }
-            ?: 800f
-        val probeHeight = (roughBottom + 2400f).toInt().coerceAtLeast(2200)
-        val probeBitmap = Bitmap.createBitmap(widthPx, probeHeight, Bitmap.Config.ARGB_8888)
-        val probeCanvas = Canvas(probeBitmap)
-        val probeCtx = VexRenderingContext().apply {
-            canvas = probeCanvas
-            debugCollectGlyphBoxes = true
-        }
-
-        val refinedStates = mutableListOf<RowRenderState>()
-
-        for ((rowIndex, originalRow) in rows.withIndex()) {
-            val baseRow = if (rowIndex == 0) originalRow else shiftRowByDelta(originalRow, 0f)
-            val measuredGlyphBBoxes = measureRowGlyphBBoxes(
-                rowMeasures = baseRow,
-                rowY = baseRow.minOfOrNull { it.topY() } ?: 0f,
-                horizontalPadding = horizontalPadding,
-                systemWidth = systemWidth,
-                ctx = probeCtx
-            )
-
-            val previous = refinedStates.lastOrNull()
-            val targetGapPx = 2f * (
-                baseRow
-                    .flatMap { it.staves }
-                    .maxOfOrNull { it.stave.spacingBetweenLines }
-                    ?: 7f
-            )
-
-            val deltaY = if (previous == null || previous.glyphBBoxes.isEmpty() || measuredGlyphBBoxes.isEmpty()) {
-                0f
-            } else {
-                computeRowDeltaForGlyphGap(
-                    previous = previous.glyphBBoxes,
-                    current = measuredGlyphBBoxes,
-                    targetGapPx = targetGapPx
-                )
-            }
-
-            if (deltaY == 0f) {
-                refinedStates += RowRenderState(baseRow, measuredGlyphBBoxes)
-            } else {
-                val shiftedRow = shiftRowByDelta(baseRow, deltaY)
-                val shiftedGlyphBoxes = measuredGlyphBBoxes.map { it.shifted(deltaY) }
-                refinedStates += RowRenderState(shiftedRow, shiftedGlyphBoxes)
-            }
-        }
-
-        probeBitmap.recycle()
-        return refinedStates
-    }
-
-    private fun measureRowGlyphBBoxes(
-        rowMeasures: List<MusicSheetToVF.RenderedMeasure>,
-        rowY: Float,
-        horizontalPadding: Float,
-        systemWidth: Float,
-        ctx: VexRenderingContext
-    ): List<GlyphBBox> {
-        val system = VFSystem(
-            x = horizontalPadding,
-            y = rowY,
-            width = systemWidth
-        )
-        rowMeasures.forEach { system.addMeasure(it) }
-        ctx.consumeDebugGlyphBoxes()
-        system.draw(ctx)
-        return computeSplitGlyphBBoxes(ctx.consumeDebugGlyphBoxes())
-    }
-
-    private fun computeRowDeltaForGlyphGap(
-        previous: List<GlyphBBox>,
-        current: List<GlyphBBox>,
-        targetGapPx: Float
-    ): Float {
-        var requiredDelta = 0f
-        val previousByStaff = previous.associateBy { it.staffNumber }
-        val currentByStaff = current.associateBy { it.staffNumber }
-        val sharedStaffs = previousByStaff.keys.intersect(currentByStaff.keys)
-
-        if (sharedStaffs.isNotEmpty()) {
-            sharedStaffs.forEach { staffNumber ->
-                val prev = previousByStaff.getValue(staffNumber)
-                val cur = currentByStaff.getValue(staffNumber)
-                val minTop = prev.bottom + targetGapPx
-                requiredDelta = maxOf(requiredDelta, minTop - cur.top)
-            }
-        } else {
-            val prevBottom = previous.maxOfOrNull { it.bottom } ?: 0f
-            val curTop = current.minOfOrNull { it.top } ?: 0f
-            requiredDelta = maxOf(requiredDelta, (prevBottom + targetGapPx) - curTop)
-        }
-
-        return requiredDelta.coerceAtLeast(0f)
-    }
-
-    private fun shiftRowByDelta(
-        row: List<MusicSheetToVF.RenderedMeasure>,
-        deltaY: Float
-    ): List<MusicSheetToVF.RenderedMeasure> {
-        if (deltaY == 0f) return row
-
-        return row.map { measure ->
-            val shiftedStaves = measure.staves.map { staffRender ->
-                val source = staffRender.stave
-                val shifted = dev.pola.vexflow.elements.VFStave(
-                    x = source.x,
-                    y = source.y + deltaY,
-                    width = source.width,
-                    options = source.options
-                ).apply {
-                    lineThickness = source.lineThickness
-                    clef = source.clef
-                    keySignature = source.keySignature
-                    timeSignature = source.timeSignature
-                    startBarline = source.startBarline
-                    endBarline = source.endBarline
-                }
-                staffRender.voices.forEach { voice ->
-                    voice.setStave(shifted)
-                    voice.tickables.forEach { note -> note.setStave(shifted) }
-                }
-                staffRender.copy(stave = shifted)
-            }
-            measure.copy(staves = shiftedStaves)
-        }
-    }
-
     private fun computeSplitContentBBoxes(rowMeasures: List<MusicSheetToVF.RenderedMeasure>): List<ContentBBox> {
         if (rowMeasures.isEmpty()) return emptyList()
 
@@ -557,7 +413,7 @@ object VisualRenderHarness {
         }
     }
 
-    private fun computeSplitGlyphBBoxes(glyphBoxes: List<VexRenderingContext.DrawnGlyphBox>): List<GlyphBBox> {
+    private fun computeSplitGlyphBBoxes(glyphBoxes: List<VexRenderingContext.DrawnGlyphBox>): List<VFRenderedRowSpacingRefiner.StaffGlyphBounds> {
         if (glyphBoxes.isEmpty()) return emptyList()
 
         return glyphBoxes
@@ -565,7 +421,7 @@ object VisualRenderHarness {
             .groupBy { it.staffNumber!! }
             .toSortedMap()
             .map { (staffNumber, boxes) ->
-                GlyphBBox(
+                VFRenderedRowSpacingRefiner.StaffGlyphBounds(
                     staffNumber = staffNumber,
                     left = boxes.minOf { it.left },
                     top = boxes.minOf { it.top },
@@ -592,6 +448,14 @@ object VisualRenderHarness {
             Color.rgb(161, 97, 208)
         )
         return palette[index % palette.size]
+    }
+
+    private fun isCompactMeasure(measure: MusicSheetToVF.RenderedMeasure): Boolean {
+        val expectedTicks = measure.staves
+            .flatMap { it.voices }
+            .map { it.getExpectedTotalTicks().doubleValue }
+        val smallestExpected = expectedTicks.minOrNull() ?: return false
+        return smallestExpected <= 0.5
     }
 
     private fun parseFirstSystemTargetFromEnv(default: Int? = null): Int? {

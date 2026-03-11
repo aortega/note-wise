@@ -1,6 +1,6 @@
 # TrackPlay Android Architecture (Living)
 
-Last updated: 2026-03-07T22:15:05Z
+Last updated: 2026-03-10T20:25:00Z
 Active app target: `android/NoteWise`
 
 ## Purpose
@@ -23,7 +23,7 @@ Use this file for:
 - If conflict exists, implementation behavior follows `android/IMPLEMENTATION_SPEC.md`.
 
 ## Current Architecture Snapshot
-Status: M0-M10 completed (M10 closed with automated tests/build plus on-device render validation and user approval).
+Status: M0-M9 completed; M10 reopened and currently BROKEN during visual-conformance recovery.
 
 ### Application Layer
 - App module: `android/NoteWise/app`
@@ -141,6 +141,8 @@ Status: M0-M10 completed (M10 closed with automated tests/build plus on-device r
   `android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFSystem.kt`
 - Greedy line-break and row relayout engine that clones staves with per-row geometry:
   `android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt`
+- Shared rendered-bounds row-spacing refiner used by runtime view and visual harness:
+  `android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFRenderedRowSpacingRefiner.kt`
 - Multi-row Android view that computes system layout on size changes:
   `android/NoteWise/app/src/main/java/dev/pola/vexflow/view/MultiStaveSheetMusicView.kt`
 - Compose wrapper for M10 multi-row view:
@@ -150,6 +152,9 @@ Status: M0-M10 completed (M10 closed with automated tests/build plus on-device r
   `android/NoteWise/app/src/main/java/dev/pola/notewise/screens/RendererScreen.kt`
 - Layout overlap regression test:
   `android/NoteWise/app/src/test/java/dev/pola/vexflow/elements/VFLineBreakerTest.kt`
+- Rendered draw-bounds collection now lives in the shared canvas abstraction and is used for
+  row-spacing refinement in both runtime and visual tests:
+  `android/NoteWise/app/src/main/java/dev/pola/vexflow/core/VexRenderingContext.kt`
 
 ### Assets (M0)
 - Font: `android/NoteWise/app/src/main/assets/fonts/Bravura.otf`
@@ -202,6 +207,7 @@ Referenced decisions:
 - DEC-018: keep SAF import surface in NoteWise app layer
 - DEC-019: close M9 with sample-backed runtime import tests
 - DEC-020: rebuild staves per system row in M10 line breaking
+- DEC-027: share rendered-bounds row spacing refinement across runtime and visual tests
 
 ## Known Deviations
 - App target differs from original `Renderer` module due missing legacy Android source.
@@ -215,6 +221,9 @@ Referenced decisions:
 - M8 renderer integration currently targets the first parsed part and an initial measure subset for fast visual iteration; expanded pagination/system layout remains in later milestones.
 - M9 closure uses repository-sample integration tests for parser and URI import-handler paths in this environment; optional device picker walkthrough can still be run as supplemental UX evidence.
 - M10 uses an estimated-width + proportional-extra-space line-break strategy and relaid stave clones; closure was accepted with on-device rendering evidence (`android/docs/notewise_m10_render.png`).
+- M10 currently layers an experimental rendered-bounds row-spacing refiner on top of the base
+  line-break layout so runtime and visual harness share vertical spacing logic. This reduced
+  heuristic divergence but has not yet improved overall `01a` conformance and may be rolled back.
 - Pinch-to-zoom and related reflow/repagination behavior are scoped to M11 per implementation spec.
 - Virtual staff inference for missing `<staff>` tags now requires multi-staff clef declarations; wide single-staff ranges (for example `01a-Pitches-Pitches.xml`) are intentionally kept on one staff.
 

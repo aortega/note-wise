@@ -234,6 +234,10 @@ class MusicXMLParser {
         var slurEnd = false
         var beamState = BeamState.NONE
         var accidental: String? = null
+        var accidentalCautionary = false
+        var accidentalEditorial = false
+        var accidentalParenthesized = false
+        var accidentalBracketed = false
 
         var event = parser.next()
         while (!(event == XmlPullParser.END_TAG && parser.name == "note")) {
@@ -267,12 +271,32 @@ class MusicXMLParser {
                         }
                     }
                     "accidental" -> {
+                        val cautionaryAttr = parser.getAttributeValue(null, "cautionary")
+                        val editorialAttr = parser.getAttributeValue(null, "editorial")
+                        val parenthesesAttr =
+                            parser.getAttributeValue(null, "parentheses")
+                                ?: parser.getAttributeValue(null, "parenthesized")
+                        val bracketAttr = parser.getAttributeValue(null, "bracket")
+
+                        accidentalCautionary = parseYesNo(cautionaryAttr) == true
+                        accidentalEditorial = parseYesNo(editorialAttr) == true
+                        val explicitParenthesized = parseYesNo(parenthesesAttr)
+                        val explicitBracketed = parseYesNo(bracketAttr)
+                        // Default behavior: cautionary -> parentheses, editorial -> brackets
+                        accidentalBracketed = explicitBracketed ?: accidentalEditorial
+                        // Brackets suppress parentheses: only render parentheses if not bracketed
+                        accidentalParenthesized = if (accidentalBracketed) false else (explicitParenthesized ?: accidentalCautionary)
+
                         accidental = when (parser.nextText().trim()) {
                             "sharp" -> "#"
                             "flat" -> "b"
                             "natural" -> "n"
                             "double-sharp" -> "##"
                             "flat-flat" -> "bb"
+                            "quarter-flat" -> "qb"
+                            "quarter-sharp" -> "qs"
+                            "three-quarters-flat" -> "db"
+                            "three-quarters-sharp" -> "#t"
                             else -> null
                         }
                     }
@@ -308,8 +332,20 @@ class MusicXMLParser {
                 slurStart = slurStart,
                 slurEnd = slurEnd,
                 beamState = beamState,
-                accidental = accidental
+                accidental = accidental,
+                accidentalCautionary = accidentalCautionary,
+                accidentalEditorial = accidentalEditorial,
+                accidentalParenthesized = accidentalParenthesized,
+                accidentalBracketed = accidentalBracketed
             )
+        }
+    }
+
+    private fun parseYesNo(raw: String?): Boolean? {
+        return when (raw?.trim()?.lowercase()) {
+            "yes" -> true
+            "no" -> false
+            else -> null
         }
     }
 

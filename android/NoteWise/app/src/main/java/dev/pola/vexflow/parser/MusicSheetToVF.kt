@@ -5,6 +5,7 @@ import dev.pola.vexflow.elements.VFBarline
 import dev.pola.vexflow.elements.VFBarlineType
 import dev.pola.vexflow.elements.VFBeam
 import dev.pola.vexflow.elements.VFClef
+import dev.pola.vexflow.elements.VFAccidental
 import dev.pola.vexflow.elements.VFKeySignature
 import dev.pola.vexflow.elements.VFStave
 import dev.pola.vexflow.elements.VFStaveOptions
@@ -462,14 +463,31 @@ object MusicSheetToVF {
         val primary = group.primary
         val duration = durationToVF(primary.duration, divisions) + if (primary is RestData) "r" else ""
 
+        val keyedNotes = when (primary) {
+            is RestData -> emptyList()
+            is NoteData -> {
+                val chordNotes = group.chordNotes.filter { staffResolver(it) == staffResolver(primary) }
+                listOf(primary) + chordNotes
+            }
+        }
+
         val keys = when (primary) {
             is RestData -> listOf("b/4")
             is NoteData -> {
-                val primaryKey = pitchToKey(primary.pitch, primary.accidental, keyFifths)
-                val chordKeys = group.chordNotes
-                    .filter { staffResolver(it) == staffResolver(primary) }
-                    .map { pitchToKey(it.pitch, it.accidental, keyFifths) }
-                listOf(primaryKey) + chordKeys
+                keyedNotes.map { pitchToKey(it.pitch, it.accidental, keyFifths) }
+            }
+        }
+
+        val accidentalDisplayOptions = keyedNotes.map { note ->
+            if (note.accidental == null) {
+                null
+            } else {
+                VFAccidental.DisplayOptions(
+                    cautionary = note.accidentalCautionary,
+                    editorial = note.accidentalEditorial,
+                    parenthesized = note.accidentalParenthesized,
+                    bracketed = note.accidentalBracketed
+                )
             }
         }
 
@@ -477,7 +495,8 @@ object MusicSheetToVF {
             VFStaveNoteStruct(
                 keys = keys,
                 duration = duration,
-                glyphFontScale = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
+                glyphFontScale = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES,
+                accidentalDisplayOptions = accidentalDisplayOptions
             )
         )
     }
@@ -488,15 +507,22 @@ object MusicSheetToVF {
     }
 
     private fun inferredAccidentalForPitch(pitch: Pitch, keyFifths: Int): String {
-        val actualAlter = pitch.alter.toInt()
-        val expectedAlter = expectedAlterForStep(pitch.step, keyFifths)
-        if (actualAlter == expectedAlter) return ""
-        return when (actualAlter) {
-            -2 -> "bb"
-            -1 -> "b"
-            0 -> "n"
-            1 -> "#"
-            2 -> "##"
+        val expectedAlter = expectedAlterForStep(pitch.step, keyFifths).toFloat()
+        // If the actual alter matches the expected alter, no accidental needed
+        if (Math.abs(pitch.alter - expectedAlter) < 0.01f) return ""
+        
+        // Map fractional alter values to accidental symbols (supports microtones)
+        return when {
+            // Microtone accidentals
+            Math.abs(pitch.alter - (-1.5f)) < 0.01f -> "db"      // three-quarter-flat
+            Math.abs(pitch.alter - (-1.0f)) < 0.01f -> "b"       // flat
+            Math.abs(pitch.alter - (-0.5f)) < 0.01f -> "qb"      // quarter-flat / half-flat
+            Math.abs(pitch.alter - 0.0f) < 0.01f -> "n"          // natural
+            Math.abs(pitch.alter - 0.5f) < 0.01f -> "qs"         // quarter-sharp / half-sharp
+            Math.abs(pitch.alter - 1.0f) < 0.01f -> "#"          // sharp
+            Math.abs(pitch.alter - 1.5f) < 0.01f -> "#t"         // three-quarter-sharp
+            Math.abs(pitch.alter - (-2.0f)) < 0.01f -> "bb"      // double-flat
+            Math.abs(pitch.alter - 2.0f) < 0.01f -> "##"         // double-sharp
             else -> ""
         }
     }

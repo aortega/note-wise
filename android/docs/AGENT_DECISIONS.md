@@ -2,6 +2,24 @@
 
 Capture architecture and process decisions made during autonomous implementation.
 
+## DEC-027 - Share Rendered-Bounds Row Spacing Refinement Across Runtime And Visual Tests
+- Date: 2026-03-10
+- Milestone: M10
+- Context: Inter-row vertical spacing was inconsistent because `VFLineBreaker` estimated
+  staff content extents from note/stem/accidental heuristics and did not account for all
+  rendered staff-owned primitives. The visual harness had begun to accumulate debug glyph
+  bounds, but runtime and test paths still diverged.
+- Decision: Introduce `VFRenderedRowSpacingRefiner` in main source and wire both
+  `MultiStaveSheetMusicView` and `VisualRenderHarness` through the same rendered-bounds
+  refinement pass. Extend `VexRenderingContext` debug bounds collection from SMuFL glyphs
+  only to general draw primitives (`stroke`, `fill`, `fillRect`, `strokeRect`).
+- Alternatives considered: (1) Keep heuristic spacing only — too inconsistent for staff
+  gap debugging. (2) Implement a full bitmap pixel-scan pass — more expensive and harder
+  to reuse in runtime layout.
+- Consequences: Runtime and visual tests now share one vertical row-spacing refinement path.
+  The change is explicitly experimental; focused `01a` visual diff worsened to `70.12%`, so
+  the refiner may still require tuning or rollback.
+
 ## DEC-026 - Adopt Two-Phase Visual Conformance Strategy (alphaTab → LilyPond)
 - Date: 2026-03-08
 - Milestone: M10

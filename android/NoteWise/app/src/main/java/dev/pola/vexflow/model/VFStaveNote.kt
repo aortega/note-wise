@@ -9,7 +9,8 @@ data class VFStaveNoteStruct(
     val keys: List<String>,
     val duration: String,
     val glyphFontScale: Float = 40f,
-    val stemDirection: Int = STEM_AUTO
+    val stemDirection: Int = STEM_AUTO,
+    val accidentalDisplayOptions: List<VFAccidental.DisplayOptions?> = emptyList()
 ) {
     companion object {
         const val STEM_AUTO = 0
@@ -258,7 +259,14 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
     }
 
     private fun drawAccidentals(ctx: VexRenderingContext, sv: VFStave) {
-        val centers = accidentalColumnCenters(sv)
+        val centers = accidentalColumnCenters(sv, ctx).toMutableList()
+        if (centers.isEmpty()) return
+
+        // Apply measured-bounds collision correction only for microtone accidental sets.
+        if (usesMicrotoneAccidental()) {
+            shiftAccidentalsLeftIfOverlappingNotehead(centers, sv, ctx)
+        }
+
         for ((index, acc) in accidentalObjects.withIndex()) {
             acc.x = centers[index]
             acc.staveY = sv.y
@@ -280,21 +288,23 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
     private fun accidentalSpanPx(): Float {
         if (accidentalObjects.isEmpty()) return 0f
         val spacing = stave?.spacingBetweenLines ?: (glyphFontScale / 4f)
-        val noteGap = spacing * 0.1f
+        val noteGapFactor = if (usesMicrotoneAccidental()) 0.45f else 0.1f
+        val noteGap = spacing * noteGapFactor
         val columnGap = spacing * 0.5f
-        val widths = accidentalWidthsPx(spacing)
+        val widths = accidentalWidthsPx(spacing, null)
         // Extra-left span beyond the notehead's own left half-width.
         return noteGap + widths.sum() + columnGap * (widths.size - 1).coerceAtLeast(0)
     }
 
-    private fun accidentalColumnCenters(sv: VFStave): List<Float> {
+    private fun accidentalColumnCenters(sv: VFStave, ctx: VexRenderingContext?): List<Float> {
         if (accidentalObjects.isEmpty()) return emptyList()
 
         val firstKey = keys.firstOrNull() ?: return emptyList()
         val noteHalfWidth = (safeNoteheadWidth(firstKey, sv) ?: getMetricsFallbackHeadWidth()) / 2f
-        val noteGap = sv.spacingBetweenLines * 0.1f
+        val noteGapFactor = if (usesMicrotoneAccidental()) 0.45f else 0.1f
+        val noteGap = sv.spacingBetweenLines * noteGapFactor
         val columnGap = sv.spacingBetweenLines * 0.5f
-        val widths = accidentalWidthsPx(sv.spacingBetweenLines)
+        val widths = accidentalWidthsPx(sv.spacingBetweenLines, ctx)
 
         val centers = MutableList(accidentalObjects.size) { 0f }
         centers[0] = x - noteHalfWidth - noteGap - (widths[0] / 2f)
@@ -304,15 +314,62 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
         return centers
     }
 
-    private fun accidentalWidthsPx(staffSpacing: Float): List<Float> {
+    private fun accidentalWidthsPx(staffSpacing: Float, ctx: VexRenderingContext?): List<Float> {
         return accidentalObjects.map { accidental ->
-            runCatching {
-                VFGlyphBoundingBoxManager.get(accidental.type.glyphName)
-                    ?.scaled(staffSpacing)
-                    ?.width
-            }.getOrNull()
-                ?.coerceAtLeast(staffSpacing * 0.35f)
-                ?: (staffSpacing * 0.75f)
+            accidental.staffLineSpacing = staffSpacing
+            accidental.approximateWidthPx(ctx).coerceAtLeast(staffSpacing * 0.35f)
+        }
+    }
+
+    private fun shiftAccidentalsLeftIfOverlappingNotehead(
+        centers: MutableList<Float>,
+        sv: VFStave,
+        ctx: VexRenderingContext
+    ) {
+        if (accidentalObjects.isEmpty() || centers.isEmpty()) return
+
+        val noteheadLeft = noteheadLeftEdgePx(sv)
+        val desiredGap = sv.spacingBetweenLines * if (usesMicrotoneAccidental()) 0.2f else 0.1f
+        val firstBounds = accidentalHorizontalBoundsPx(accidentalObjects.first(), centers.first(), sv, ctx)
+        val overlapPx = firstBounds.second - (noteheadLeft - desiredGap)
+        if (overlapPx <= 0f) return
+
+        val shiftPx = overlapPx + sv.spacingBetweenLines * 0.1f
+        for (i in centers.indices) {
+            centers[i] -= shiftPx
+        }
+    }
+
+    private fun noteheadLeftEdgePx(sv: VFStave): Float {
+        val firstKey = keys.firstOrNull() ?: return x - (getMetricsFallbackHeadWidth() / 2f)
+        val placement = noteheadPlacement(firstKey, sv)
+        if (placement != null) {
+            return placement.originX + placement.bbox.southwest.x
+        }
+        val width = safeNoteheadWidth(firstKey, sv) ?: getMetricsFallbackHeadWidth()
+        return x - (width / 2f)
+    }
+
+    private fun accidentalHorizontalBoundsPx(
+        accidental: VFAccidental,
+        centerX: Float,
+        sv: VFStave,
+        ctx: VexRenderingContext
+    ): Pair<Float, Float> {
+        accidental.staffLineSpacing = sv.spacingBetweenLines
+        return accidental.horizontalBoundsPx(centerX, ctx)
+    }
+
+    private fun usesMicrotoneAccidental(): Boolean {
+        return accidentalObjects.any { accidental ->
+            when (accidental.type) {
+                VFAccidental.AccidentalType.QUARTER_FLAT,
+                VFAccidental.AccidentalType.QUARTER_SHARP,
+                VFAccidental.AccidentalType.HALF_SHARP,
+                VFAccidental.AccidentalType.THREE_QUARTER_FLAT,
+                VFAccidental.AccidentalType.THREE_QUARTER_SHARP -> true
+                else -> false
+            }
         }
     }
 
@@ -354,6 +411,11 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
         VFAccidental.AccidentalType.NATURAL -> "n"
         VFAccidental.AccidentalType.DOUBLE_SHARP -> "##"
         VFAccidental.AccidentalType.DOUBLE_FLAT -> "bb"
+        VFAccidental.AccidentalType.QUARTER_FLAT -> "qb"
+        VFAccidental.AccidentalType.QUARTER_SHARP -> "qs"
+        VFAccidental.AccidentalType.HALF_SHARP -> "#h"
+        VFAccidental.AccidentalType.THREE_QUARTER_FLAT -> "db"
+        VFAccidental.AccidentalType.THREE_QUARTER_SHARP -> "#t"
     }
 
     private fun shouldDrawDebugGlyphLabels(): Boolean {
@@ -379,11 +441,13 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
 
     private fun rebuildAccidentals() {
         accidentalObjects.clear()
-        for (key in keys) {
+        for ((index, key) in keys.withIndex()) {
             val accStr = extractAccidental(key) ?: continue
             val accType = VFAccidental.AccidentalType.fromString(accStr) ?: continue
             val noteLine = pitchToNoteLineIndex(key, stave)
-            accidentalObjects += VFAccidental(accType, noteLine)
+            val displayOptions = struct.accidentalDisplayOptions.getOrNull(index)
+                ?: VFAccidental.DisplayOptions()
+            accidentalObjects += VFAccidental(accType, noteLine, displayOptions)
         }
     }
 
@@ -430,14 +494,7 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
             // Key format is "<letter><optional accidental>/<octave>", e.g. "b/4", "bb/4", "c#/5".
             // The first character is always the diatonic step and must not be treated as an accidental.
             val accidentalSuffix = pitchPart.drop(1)
-            return when (accidentalSuffix) {
-                "##" -> "##"
-                "bb" -> "bb"
-                "#" -> "#"
-                "b" -> "b"
-                "n" -> "n"
-                else -> null
-            }
+            return accidentalSuffix.takeIf { VFAccidental.AccidentalType.fromString(it) != null }
         }
     }
 }

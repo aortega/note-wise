@@ -118,4 +118,48 @@ class VFFormatterTest {
             assertTrue(note.x + m.totalRightPx <= rightBound, "Note $i right overflow")
         }
     }
+
+    @Test
+    fun `four quarter notes use alphaTab style spring anchors`() {
+        val stave = VFStave(0f, 100f, 130f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("4/4").apply { setStave(stave) }
+        val notes = listOf("g/2", "a/2", "b/2", "c/3").map { quarterNote(it) }
+        voice.addTickables(notes)
+
+        val startX = 10f
+        formatter.formatVoices(listOf(voice), stave, startX = startX, justifyWidth = 120f)
+
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val available = (stave.x + stave.width - startX - rightSafety).coerceAtLeast(0f)
+        val expectedFirstX = startX + notes.first().getMetrics().totalLeftPx
+        val expectedSpringWidth = (available - notes.first().getMetrics().totalLeftPx) / notes.size
+
+        assertEquals(expectedFirstX, notes.first().x, 0.01f)
+        for (i in 1 until notes.size) {
+            assertEquals(expectedSpringWidth, notes[i].x - notes[i - 1].x, 0.01f)
+        }
+    }
+
+    @Test
+    fun `two quarter notes in 2-4 time use equal spring anchors`() {
+        val stave = VFStave(0f, 100f, 130f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("2/4").apply { setStave(stave) }
+        val notes = listOf("c/5", "d/5").map { quarterNote(it) }
+        voice.addTickables(notes)
+
+        val startX = 10f
+        formatter.formatVoices(listOf(voice), stave, startX = startX, justifyWidth = 120f)
+
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val available = (stave.x + stave.width - startX - rightSafety).coerceAtLeast(0f)
+        val expectedFirstX = startX + notes.first().getMetrics().totalLeftPx
+        val expectedSpringWidth = (available - notes.first().getMetrics().totalLeftPx) / notes.size
+
+        assertEquals(expectedFirstX, notes.first().x, 0.01f)
+        assertEquals(expectedFirstX + expectedSpringWidth, notes[1].x, 0.01f)
+        // Second note should be at the midpoint of the available region
+        assertTrue(notes[1].x > notes[0].x)
+    }
 }

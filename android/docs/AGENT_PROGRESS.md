@@ -1,21 +1,27 @@
 # Autonomous Progress Dashboard
 
-Last updated: 2026-03-09T05:15:00Z
+Last updated: 2026-03-10T20:25:00Z
 
 ## Current Focus
 - Milestone: M10
 - Status: BROKEN (IN_PROGRESS)
 - Percent: 84
-- Current task: Stabilize post-fix horizontal spacing changes (opening padding + numeric
-  time signature width/anchor) and recover visual conformance for early MusicXML fixtures.
+- Current task: Stabilize first-system spacing recovery for `01a-Pitches-Pitches.xml`
+  and decide whether the new shared rendered-bounds row-spacing refiner should be kept,
+  tuned further, or rolled back.
 - Blocker: Current NoteWise output is not compatible with approved musicxml-suite goldens.
-  Latest targeted run (01a/01b/01c) fails 3/3 with high diff:
-  - 01a: 64.90%
+  Latest targeted verification shows the focused `01a` fixture still failing after multiple
+  spacing experiments, including a shared runtime/test rendered-bounds row refiner:
+  - 01a: 70.12%
   - 01b: 64.52%
   - 01c: 70.40%
 - Partial progress retained:
   - 01c measure width reduced from ~148.61px to ~130.49px (about 18px reduction),
     matching prior over-width diagnosis (~17px).
+  - Four-quarter-note formatting now uses alphaTab-style spring anchors instead of the
+    previous centered note-block rule.
+  - Vertical spacing no longer uses the prior `6.4 × staffSpacing` hardcoded row gap.
+    Runtime and visual harness now share an experimental rendered-bounds row refiner.
   - Review renders generated for manual feedback:
     `android/NoteWise/app/build/reports/visual-tests/lilypond/review/`
     - `01a_pitches_pitches.post-fix.review.png`
@@ -33,13 +39,13 @@ Last updated: 2026-03-09T05:15:00Z
   Tier-1 01a: 97.31% diff at 635×1513
   Full suite: ran=150 skipped=0 failures=150 (2026-03-09)
   5 near-blank renders: 41i/41j/41k/41l/72c (PartNameDisplay / transposing change edge cases)
-- Next task: Either (A) calibrate padding/time-signature placement further for 01a/01b/01c
-  until manual review is acceptable, then decide on golden promotion, or (B) rollback to
-  pre-fix behavior if no near-term convergence.
+- Next task: Inspect the refreshed `01a` render row-by-row, confirm whether the shared
+  rendered-bounds row refiner fixed consistency but over-tightened/shifted other geometry,
+  and either tune it or rollback that experiment while preserving the quarter-note spacing fix.
 - Last verification run:
-  `MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml,01b-Pitches-Intervals.xml,01c-Pitches-NoVoiceElement.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest`
-  → ran=3 failures=3 (visual mismatch against approved goldens)
-  (2026-03-09T05:10:37Z)
+  `MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest`
+  → FAIL (1/1), diff `134744/192172 opaque pixels = 70.12%`
+  (2026-03-10T20:16:00Z)
 
 ## Milestone Board
 - M0: DONE

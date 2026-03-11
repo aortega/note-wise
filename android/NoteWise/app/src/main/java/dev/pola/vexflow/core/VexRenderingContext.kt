@@ -8,6 +8,8 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import dev.pola.notewise.App
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Abstraction over Android Canvas + Paint.
@@ -102,6 +104,27 @@ open class VexRenderingContext {
 
     private var currentPath = Path()
 
+    private fun recordDebugBox(left: Float, top: Float, right: Float, bottom: Float) {
+        if (!debugCollectGlyphBoxes) return
+        if (!left.isFinite() || !top.isFinite() || !right.isFinite() || !bottom.isFinite()) return
+
+        val normalizedLeft = min(left, right)
+        val normalizedTop = min(top, bottom)
+        val normalizedRight = max(left, right)
+        val normalizedBottom = max(top, bottom)
+        if (normalizedRight < normalizedLeft || normalizedBottom < normalizedTop) return
+
+        debugGlyphBoxes += DrawnGlyphBox(
+            codepoint = 0,
+            measureNumber = debugGlyphMeasureNumber,
+            staffNumber = debugGlyphStaffNumber,
+            left = normalizedLeft,
+            top = normalizedTop,
+            right = normalizedRight,
+            bottom = normalizedBottom
+        )
+    }
+
     open fun beginPath() {
         currentPath = Path()
     }
@@ -146,18 +169,36 @@ open class VexRenderingContext {
     }
 
     open fun stroke() {
+        if (debugCollectGlyphBoxes) {
+            val bounds = RectF()
+            currentPath.computeBounds(bounds, true)
+            if (!bounds.isEmpty) {
+                val pad = strokePaint.strokeWidth / 2f
+                recordDebugBox(bounds.left - pad, bounds.top - pad, bounds.right + pad, bounds.bottom + pad)
+            }
+        }
         _canvas?.drawPath(currentPath, strokePaint)
     }
 
     open fun fill() {
+        if (debugCollectGlyphBoxes) {
+            val bounds = RectF()
+            currentPath.computeBounds(bounds, true)
+            if (!bounds.isEmpty) {
+                recordDebugBox(bounds.left, bounds.top, bounds.right, bounds.bottom)
+            }
+        }
         _canvas?.drawPath(currentPath, fillPaint)
     }
 
     open fun fillRect(x: Float, y: Float, width: Float, height: Float) {
+        recordDebugBox(x, y, x + width, y + height)
         _canvas?.drawRect(x, y, x + width, y + height, fillPaint)
     }
 
     open fun strokeRect(x: Float, y: Float, width: Float, height: Float) {
+        val pad = strokePaint.strokeWidth / 2f
+        recordDebugBox(x - pad, y - pad, x + width + pad, y + height + pad)
         _canvas?.drawRect(x, y, x + width, y + height, strokePaint)
     }
 
@@ -169,6 +210,15 @@ open class VexRenderingContext {
 
     fun setFontSize(sizePx: Float) {
         textPaint.textSize = sizePx
+    }
+
+    open fun measureSmuflGlyphBounds(codepoint: Int, sizePx: Float): RectF {
+        glyphPaint.typeface = bravuraTypeface
+        glyphPaint.textSize = sizePx
+        val glyphStr = String(Character.toChars(codepoint))
+        val raw = Rect()
+        glyphPaint.getTextBounds(glyphStr, 0, glyphStr.length, raw)
+        return RectF(raw.left.toFloat(), raw.top.toFloat(), raw.right.toFloat(), raw.bottom.toFloat())
     }
 
     open fun drawSmuflGlyph(codepoint: Int, x: Float, y: Float, sizePx: Float) {

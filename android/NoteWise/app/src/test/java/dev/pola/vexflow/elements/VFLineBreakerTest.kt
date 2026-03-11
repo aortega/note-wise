@@ -55,6 +55,27 @@ class VFLineBreakerTest {
     }
 
     @Test
+    fun `default inter row spacing stays content driven`() {
+        val measures = List(12) { buildMeasure(noteCount = 4) }
+
+        val layout = VFLineBreaker.layout(
+            measures = measures,
+            systemWidth = 800f,
+            startX = 20f,
+            startY = 60f
+        )
+
+        assertTrue("Expected at least two rows", layout.rows.size >= 2)
+
+        val firstRowBottom = layout.systemY[0] + layout.systemHeights[0]
+        val secondRowTop = layout.systemY[1]
+        val gap = secondRowTop - firstRowBottom
+
+        assertTrue("Gap should be compact, was $gap", gap <= 24f)
+        assertTrue("Gap should still be positive, was $gap", gap >= 18f)
+    }
+
+    @Test
     fun `consecutive staves keep minimum 2x spacing between content`() {
         val measure = buildGrandStaffMeasureForOverlap()
 

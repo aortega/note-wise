@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import dev.pola.vexflow.elements.VFStave
 import dev.pola.vexflow.elements.VFStaveOptions
+import dev.pola.vexflow.elements.VFAccidental
 
 class VFStaveNoteTest {
 
@@ -104,5 +105,53 @@ class VFStaveNoteTest {
         // Keep accidental gap compact and staff-space-based (roughly <= 2 staff spaces).
         assertTrue(accidentalExtraLeft <= staffSpacing * 2f)
         assertTrue(accidentalExtraLeft >= staffSpacing * 0.4f)
+    }
+
+    @Test
+    fun `microtone accidental contributes left spacing`() {
+        val staffSpacing = 8f
+        val stave = VFStave(
+            x = 0f,
+            y = 80f,
+            width = 400f,
+            options = VFStaveOptions(spacingBetweenLinesPx = staffSpacing)
+        )
+        val n = VFStaveNote(
+            VFStaveNoteStruct(keys = listOf("eqs/4"), duration = "4", glyphFontScale = staffSpacing * 4f)
+        )
+        n.setStave(stave)
+
+        val metrics = n.getMetrics()
+        assertTrue(metrics.totalLeftPx > metrics.totalRightPx)
+    }
+
+    @Test
+    fun `decorated accidental reserves extra left spacing`() {
+        val staffSpacing = 8f
+        val stave = VFStave(
+            x = 0f,
+            y = 80f,
+            width = 400f,
+            options = VFStaveOptions(spacingBetweenLinesPx = staffSpacing)
+        )
+
+        val plain = VFStaveNote(
+            VFStaveNoteStruct(keys = listOf("f#/4"), duration = "4", glyphFontScale = staffSpacing * 4f)
+        )
+        plain.setStave(stave)
+
+        val decorated = VFStaveNote(
+            VFStaveNoteStruct(
+                keys = listOf("f#/4"),
+                duration = "4",
+                glyphFontScale = staffSpacing * 4f,
+                accidentalDisplayOptions = listOf(
+                    VFAccidental.DisplayOptions(parenthesized = true, bracketed = true)
+                )
+            )
+        )
+        decorated.setStave(stave)
+
+        assertTrue(decorated.getMetrics().totalLeftPx > plain.getMetrics().totalLeftPx)
     }
 }

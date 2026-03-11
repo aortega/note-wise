@@ -9,18 +9,24 @@ Track defects, blockers, and mitigations discovered during autonomous delivery.
 - Type: TEST
 - Symptoms: After applying opening-padding/time-signature alignment changes, targeted
 	fixtures `01a/01b/01c` all fail visual conformance against current approved goldens.
-	Latest diffs: `01a=64.90%`, `01b=64.52%`, `01c=70.40%`.
+	Latest diffs: `01a=70.12%`, `01b=64.52%`, `01c=70.40%`.
 - Root cause: Recent horizontal-layout calibration moved geometry in the intended
 	direction for 01c width, but current aggregate placement remains incompatible with
-	the currently approved musicxml-suite baseline.
+	the currently approved musicxml-suite baseline. Vertical staff-to-staff spacing was
+	also inconsistent because the core layout path estimated content extents heuristically
+	instead of measuring all rendered staff-owned primitives.
 - Fix: IN_PROGRESS. Keep the new diagnostic changes, review post-fix renders,
 	and either (a) continue calibration toward visual convergence, or (b) rollback if
-	convergence is not reached quickly.
+	convergence is not reached quickly. Latest experiment introduced a shared
+	rendered-bounds row-spacing refiner for runtime + visual harness, which improves
+	measurement fidelity but worsened the overall 01a diff and may need rollback.
 - Verification:
-	`MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml,01b-Pitches-Intervals.xml,01c-Pitches-NoVoiceElement.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest`
-	-> FAIL (3/3) with metrics above.
+	`MUSICXML_SUITE_FIXTURES="01a-Pitches-Pitches.xml" ./gradlew :app:testDebugUnitTest --tests dev.pola.notewise.visual.MusicXMLSuiteVisualTest`
+	-> FAIL (1/1), `01a=70.12%` after shared rendered-bounds row refiner experiment.
 - Follow-up: Do not promote new goldens while ISSUE-013 remains open; use review PNGs in
-	`app/build/reports/visual-tests/lilypond/review/` for sign-off.
+	`app/build/reports/visual-tests/lilypond/review/` for sign-off. If row-refinement
+	experiment is rejected, revert `VFRenderedRowSpacingRefiner.kt`, `VexRenderingContext.kt`,
+	`MultiStaveSheetMusicView.kt`, `VisualRenderHarness.kt`, and `VexRenderingContextTest.kt`.
 
 ## ISSUE-012 - Wide Single-Staff Scores Misclassified As Virtual Grand Staff
 - Status: RESOLVED

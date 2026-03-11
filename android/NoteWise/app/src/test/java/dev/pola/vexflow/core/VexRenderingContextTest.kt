@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -96,5 +97,26 @@ class VexRenderingContextTest {
         ctx.drawSmuflGlyph(0xE050, 70f, 120f, 36f)
 
         assertTrue(ctx.debugDrawGlyphAnchors)
+    }
+
+    @Test
+    fun `debug glyph box collection records primitives and tags`() {
+        val (ctx, _) = makeCtx()
+
+        ctx.debugCollectGlyphBoxes = true
+        ctx.debugGlyphMeasureNumber = 12
+        ctx.debugGlyphStaffNumber = 2
+
+        ctx.fillRect(10f, 20f, 30f, 40f)
+        ctx.beginPath()
+        ctx.moveTo(50f, 60f)
+        ctx.lineTo(90f, 60f)
+        ctx.stroke()
+        ctx.drawSmuflGlyph(0xE050, 70f, 120f, 36f)
+
+        val boxes = ctx.consumeDebugGlyphBoxes()
+        assertFalse(boxes.isEmpty())
+        assertTrue(boxes.all { it.measureNumber == 12 })
+        assertTrue(boxes.all { it.staffNumber == 2 })
     }
 }

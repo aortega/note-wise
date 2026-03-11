@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import dev.pola.vexflow.core.VexRenderingContext
 import dev.pola.vexflow.elements.VFLineBreaker
+import dev.pola.vexflow.elements.VFRenderedRowSpacingRefiner
 import dev.pola.vexflow.elements.VFSystem
 import dev.pola.vexflow.parser.MusicSheetToVF
 
@@ -58,7 +59,7 @@ class MultiStaveSheetMusicView @JvmOverloads constructor(
         val horizontalPadding = 0f
         val availableWidth = (viewWidth.toFloat() - horizontalPadding * 2f).coerceAtLeast(240f)
         val topY = 70f
-        val systemSpacing = 36f
+        val systemSpacing = 0f
 
         val layout = VFLineBreaker.layout(
             measures = sourceMeasures,
@@ -68,7 +69,23 @@ class MultiStaveSheetMusicView @JvmOverloads constructor(
             systemSpacing = systemSpacing
         )
 
-        systems = layout.rows.zip(layout.systemY).map { (rowMeasures, rowY) ->
+        val compactOnlyLayout = sourceMeasures.isNotEmpty() && sourceMeasures.all { isCompactMeasure(it) }
+        val refinedRows = if (compactOnlyLayout) {
+            layout.rows.map { row ->
+                VFRenderedRowSpacingRefiner.RefinedRow(measures = row, glyphBounds = emptyList())
+            }
+        } else {
+            VFRenderedRowSpacingRefiner.refineRows(
+                rows = layout.rows,
+                widthPx = viewWidth,
+                horizontalPadding = horizontalPadding,
+                systemWidth = availableWidth
+            )
+        }
+
+        systems = refinedRows.map { rowState ->
+            val rowMeasures = rowState.measures
+            val rowY = rowMeasures.minOfOrNull { it.topY() } ?: topY
             VFSystem(
                 x = horizontalPadding,
                 y = rowY,
@@ -78,11 +95,31 @@ class MultiStaveSheetMusicView @JvmOverloads constructor(
             }
         }
 
-        val lastY = layout.systemY.lastOrNull() ?: topY
-        val lastHeight = layout.systemHeights.lastOrNull() ?: 120f
-        totalHeightPx = lastY + lastHeight + 40f
+        val maxGlyphBottom = refinedRows
+            .flatMap { it.glyphBounds }
+            .maxOfOrNull { it.bottom }
+            ?: 0f
+        val maxStaffBottom = refinedRows
+            .flatMap { it.measures }
+            .flatMap { it.staves }
+            .maxOfOrNull { it.stave.getBottomLineBottomY() }
+            ?: (topY + 120f)
+        val maxStaffSpacingPx = refinedRows
+            .flatMap { it.measures }
+            .flatMap { it.staves }
+            .maxOfOrNull { it.stave.spacingBetweenLines }
+            ?: 10f
+        totalHeightPx = maxOf(maxGlyphBottom, maxStaffBottom) + maxStaffSpacingPx * 11f
         requestLayout()
         invalidate()
+    }
+
+    private fun isCompactMeasure(measure: MusicSheetToVF.RenderedMeasure): Boolean {
+        val expectedTicks = measure.staves
+            .flatMap { it.voices }
+            .map { it.getExpectedTotalTicks().doubleValue }
+        val smallestExpected = expectedTicks.minOrNull() ?: return false
+        return smallestExpected <= 0.5
     }
 
     override fun onDraw(canvas: Canvas) {

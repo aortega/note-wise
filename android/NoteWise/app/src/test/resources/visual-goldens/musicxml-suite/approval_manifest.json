@@ -35,8 +35,8 @@
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01c_pitches_novoiceelement_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x83, padding=[7,0,7,0])",
-    "updated_at": "2026-03-09T03:51:55+00:00"
+    "note": "Phase 1: NoteWise golden (635x83, padding=[7,0,7,0]). Note: Lyrics rendering not yet implemented (planned for Phase B).",
+    "updated_at": "2026-03-10T22:34:00+00:00"
   },
   "01d-Pitches-Microtones.xml": {
     "fixture_xml": "01d-Pitches-Microtones.xml",
@@ -48,8 +48,8 @@
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/01d_pitches_microtones_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x75, padding=[7,0,7,0])",
-    "updated_at": "2026-03-09T03:51:55+00:00"
+    "note": "CRITICAL: Microtone accidentals not implemented. Requires SMuFL microtone glyphs (quarter-tones, etc.). Blocking until resolved.",
+    "updated_at": "2026-03-10T22:34:00+00:00"
   },
   "01e-Pitches-ParenthesizedAccidentals.xml": {
     "fixture_xml": "01e-Pitches-ParenthesizedAccidentals.xml",

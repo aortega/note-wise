@@ -37,53 +37,43 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
 
         val contexts = collectTickContexts(voices)
         contexts.forEach { it.preFormat() }
-        if (applyFourQuarterGridIfApplicable(contexts, stave, startX, justifyWidth)) {
+        if (applyEqualBeatsGridIfApplicable(contexts, stave, startX, justifyWidth)) {
             return
         }
         assignXPositions(contexts, startX, justifyWidth, stave.spacingBetweenLines)
     }
 
-    private fun applyFourQuarterGridIfApplicable(
+    /**
+     * Applies alphaTab-style equal-spring anchors when every beat in the measure has the
+     * same duration (e.g. all quarter notes in 2/4, 3/4, or 4/4 time).  The first beat
+     * is anchored one pre-spring width past [startX]; the remaining width is split into
+     * N equal springs, one per beat.
+     */
+    private fun applyEqualBeatsGridIfApplicable(
         contexts: List<VFTickContext>,
         stave: VFStave,
         startX: Float,
         justifyWidth: Float
     ): Boolean {
-        if (justifyWidth <= 0f || contexts.size != 4) return false
+        if (justifyWidth <= 0f || contexts.isEmpty()) return false
         val ordered = contexts.sortedBy { it.tickID }
-        val quarter = dev.pola.vexflow.model.VFFraction.of(1, 4)
-        if (!ordered.all { it.getMaxDuration() == quarter }) return false
+        val firstDuration = ordered.first().getMaxDuration()
+        if (!ordered.all { it.getMaxDuration() == firstDuration }) return false
 
         val barRight = stave.x + stave.width
-        // Start the chain after signature modifiers so sequence reads left-to-right in note space.
         val referenceLeft = startX
-        val noteheadWidths = ordered.map { (it.rightPx * 2f).coerceAtLeast(0f) }
-        val accidentalExtraLeft = ordered.map { (it.leftPx - it.rightPx).coerceAtLeast(0f) }
-        val totalNoteVisualWidth = noteheadWidths.sum() + accidentalExtraLeft.sum()
-
-        // Center the note content block within the available note area: compute a minimum
-        // inter-note gap, then split any remaining space equally as left and right margins.
-        // Reserve space matching the physical left extent of the right barline plus 2 px so
-        // note stems never overlap any part of the barline stroke (critical for END/light-heavy).
-        val minInterNoteGap = stave.spacingBetweenLines * 0.15f
+        // Mirror alphaTab's equal-beat bar layout:
+        // 1. The first beat's on-time anchor sits one pre-spring width after the modifier block.
+        // 2. The remaining usable width is split into N equal springs (one per beat).
         val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
         val available = (barRight - referenceLeft - rightSafety).coerceAtLeast(0f)
+        val firstPreSpringWidth = ordered.first().leftPx
+        val springWidth = ((available - firstPreSpringWidth) / ordered.size.toFloat()).coerceAtLeast(0f)
 
-        // Reduce inter-note gap proportionally if the measure is too tight to fit all notes
-        // with the minimum gap; fall back to 0 if even that is impossible.
-        val actualInterNoteGap = if (totalNoteVisualWidth + minInterNoteGap * (ordered.size - 1) > available) {
-            ((available - totalNoteVisualWidth) / (ordered.size - 1)).coerceAtLeast(0f)
-        } else {
-            minInterNoteGap
-        }
-        val margin = ((available - totalNoteVisualWidth - actualInterNoteGap * (ordered.size - 1)) / 2f)
-            .coerceAtLeast(0f)
-
-        var cursor = referenceLeft + margin
-        ordered.forEachIndexed { index, ctx ->
-            val centerX = cursor + accidentalExtraLeft[index] + (noteheadWidths[index] / 2f)
-            ctx.x = centerX
-            cursor += accidentalExtraLeft[index] + noteheadWidths[index] + actualInterNoteGap
+        var onTimeX = firstPreSpringWidth
+        ordered.forEach { ctx ->
+            ctx.x = referenceLeft + onTimeX
+            onTimeX += springWidth
         }
         return true
     }

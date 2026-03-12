@@ -83,11 +83,11 @@
     "status": "approved",
     "reference_size": [
       635,
-      333
+      200
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02a_rests_durations_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x333, padding=[7,0,7,0])",
+    "note": "Phase 1: NoteWise golden (635x200, padding=[7,0,7,0]) cropped to required staff-content height.",
     "updated_at": "2026-03-09T03:51:55+00:00"
   },
   "02b-Rests-PitchedRests.xml": {
@@ -96,11 +96,11 @@
     "status": "approved",
     "reference_size": [
       635,
-      72
+      120
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02b_rests_pitchedrests_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x72, padding=[7,0,7,0])",
+    "note": "Phase 1: NoteWise golden (635x120, padding=[7,0,7,0]) to avoid staff-content clipping.",
     "updated_at": "2026-03-09T03:51:55+00:00"
   },
   "02c-Rests-MultiMeasureRests.xml": {
@@ -109,11 +109,11 @@
     "status": "approved",
     "reference_size": [
       635,
-      412
+      96
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02c_rests_multimeasurerests_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x412, padding=[7,0,7,0])",
+    "note": "Phase 1: NoteWise golden (635x96, padding=[7,0,7,0]) cropped to required staff-content height.",
     "updated_at": "2026-03-09T03:51:55+00:00"
   },
   "02d-Rests-Multimeasure-TimeSignatures.xml": {

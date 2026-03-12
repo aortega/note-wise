@@ -82,12 +82,7 @@ object MusicSheetToVF {
         val staffResolver = buildStaffResolver(part)
         val hasExplicitStaffTags = part.measures
             .flatMap { it.notes }
-            .any { note ->
-                when (note) {
-                    is NoteData -> note.staffExplicit
-                    is RestData -> note.staffExplicit
-                }
-            }
+            .any(::isStaffExplicit)
         val openingBoundarySpacingSpaces = determineOpeningBoundarySpacingSpaces(
             part = part,
             staveWidth = staveWidth,
@@ -111,10 +106,12 @@ object MusicSheetToVF {
                 continue
             }
             val attrs = measure.attributes
-            val measureStaffNumbers = measure.notes.map(staffResolver).distinct().ifEmpty { listOf(1) }
-            val firstAppearanceStaffs = measureStaffNumbers.filter { it !in seenVirtualStaffs }.toSet()
-            val segmentStartStaffs = measureStaffNumbers.filter { it !in previousMeasureStaffNumbers }.toSet()
-            seenVirtualStaffs.addAll(measureStaffNumbers)
+            val activeStaffNumbers = measure.notes.map(staffResolver).distinct().ifEmpty { listOf(1) }
+            val renderedStaffNumbers = resolveMeasureStaffNumbers(measure, staffResolver)
+            val trackedStaffNumbers = if (hasExplicitStaffTags) renderedStaffNumbers else activeStaffNumbers
+            val firstAppearanceStaffs = trackedStaffNumbers.filter { it !in seenVirtualStaffs }.toSet()
+            val segmentStartStaffs = trackedStaffNumbers.filter { it !in previousMeasureStaffNumbers }.toSet()
+            seenVirtualStaffs.addAll(trackedStaffNumbers)
             val showKeySigForMeasure =
                 visualIndex == 0 || previousAttributes?.let {
                     it.keyFifths != attrs.keyFifths || it.keyMode != attrs.keyMode
@@ -131,6 +128,7 @@ object MusicSheetToVF {
                 x = startX + visualIndex * staveWidth,
                 y = startY,
                 width = staveWidth,
+                isFirstVisualMeasure = visualIndex == 0,
                 showClef = showClef,
                 showKeySig = showKeySig && showKeySigForMeasure,
                 showTimeSig = showTimeSig && showTimeSigForMeasure,
@@ -143,7 +141,7 @@ object MusicSheetToVF {
                 inferVirtualClefs = !hasExplicitStaffTags
             ).also {
                 previousAttributes = attrs
-                previousMeasureStaffNumbers = measureStaffNumbers.toSet()
+                previousMeasureStaffNumbers = trackedStaffNumbers.toSet()
             }
 
             if (attrs.multipleRestCount > 1) {
@@ -159,6 +157,7 @@ object MusicSheetToVF {
         x: Float,
         y: Float,
         width: Float,
+        isFirstVisualMeasure: Boolean,
         showClef: Boolean,
         showKeySig: Boolean,
         showTimeSig: Boolean,
@@ -172,7 +171,7 @@ object MusicSheetToVF {
     ): RenderedMeasure {
         val attrs = measure.attributes
 
-        val staffNumbers = measure.notes.map(staffResolver).distinct().sorted().ifEmpty { listOf(1) }
+        val staffNumbers = resolveMeasureStaffNumbers(measure, staffResolver)
         val chordGroups = buildChordGroups(measure.notes)
         val measureDurationDivisions = measureDurationInDivisions(attrs)
 
@@ -203,15 +202,22 @@ object MusicSheetToVF {
                         sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
                     }
                 }
-                if (showKeySig && staffIndex == 0) {
+                if (showKeySig) {
                     keySignature = VFKeySignature(fifthsToKeySpec(attrs.keyFifths, attrs.keyMode))
                 }
-                if (showTimeSig && staffIndex == 0) {
+                if (showTimeSig) {
                     timeSignature = VFTimeSignature(attrs.timeSymbol.ifEmpty { "${attrs.timeNumerator}/${attrs.timeDenominator}" }).apply {
                         sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
                     }
                 }
-                startBarline = VFBarline(mapBarlineStyle(measure.barlineLeft))
+                val startType = mapBarlineStyle(measure.barlineLeft)
+                startBarline = VFBarline(
+                    if (!isFirstVisualMeasure && startType == VFBarlineType.SINGLE) {
+                        VFBarlineType.NONE
+                    } else {
+                        startType
+                    }
+                )
                 endBarline = VFBarline(mapBarlineStyle(measure.barlineRight))
             }
 
@@ -323,6 +329,15 @@ object MusicSheetToVF {
         return if (staffNumber == 1) "treble" else "bass"
     }
 
+    private fun resolveMeasureStaffNumbers(
+        measure: Measure,
+        staffResolver: (NoteOrRest) -> Int
+    ): List<Int> {
+        val declared = measure.attributes.clefByStaff.keys.filter { it > 0 }
+        val fromNotes = measure.notes.map(staffResolver)
+        return (declared + fromNotes + listOf(1)).distinct().sorted()
+    }
+
     private fun determineOpeningBoundarySpacingSpaces(
         part: Part,
         staveWidth: Float,
@@ -334,17 +349,7 @@ object MusicSheetToVF {
     ): Float {
         val firstMeasure = part.measures.firstOrNull() ?: return 1f
         val attrs = firstMeasure.attributes
-        val staffNumber = firstMeasure.notes.firstOrNull()?.let(staffResolver) ?: 1
-
-        val clefWidth = if (showClef) {
-            val clef = VFClef(attrs.clefForStaff(staffNumber), "default", null).apply {
-                sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
-            }
-            runCatching { clef.widthForStaffSpacing(staffLineSpacingPx) }
-                .getOrElse { clef.width }
-        } else {
-            0f
-        }
+        val staffNumbers = resolveMeasureStaffNumbers(firstMeasure, staffResolver)
 
         val keyWidth = if (showKeySig) {
             val key = VFKeySignature(fifthsToKeySpec(attrs.keyFifths, attrs.keyMode))
@@ -369,10 +374,21 @@ object MusicSheetToVF {
                 (if (showClef) VFMetrics.clefPaddingPx(staffLineSpacingPx) else 0f) +
                 (if (showKeySig) VFMetrics.keySignaturePaddingPx(staffLineSpacingPx) else 0f) +
                 (if (showTimeSig) VFMetrics.timeSignaturePaddingPx(staffLineSpacingPx) else 0f)
+        val maxClefWidth = staffNumbers.maxOfOrNull { staffNumber ->
+            if (!showClef) {
+                0f
+            } else {
+                val clef = VFClef(attrs.clefForStaff(staffNumber), "default", null).apply {
+                    sizePx = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES
+                }
+                runCatching { clef.widthForStaffSpacing(staffLineSpacingPx) }
+                    .getOrElse { clef.width }
+            }
+        } ?: 0f
         val openingWidthAtOneSpace =
-            openingPaddingAtOneScale + clefWidth + keyWidth + timeWidth
+            openingPaddingAtOneScale + maxClefWidth + keyWidth + timeWidth
         val openingWidthAtHalfSpace =
-            (openingPaddingAtOneScale * 0.5f) + clefWidth + keyWidth + timeWidth
+            (openingPaddingAtOneScale * 0.5f) + maxClefWidth + keyWidth + timeWidth
 
         val usableOneSpace = staveWidth - openingWidthAtOneSpace
         val usableHalfSpace = staveWidth - openingWidthAtHalfSpace
@@ -392,15 +408,6 @@ object MusicSheetToVF {
 
     private fun buildStaffResolver(part: Part): (NoteOrRest) -> Int {
         val allNotes = part.measures.flatMap { it.notes }
-        val hasExplicitStaffTags = allNotes.any { note ->
-            when (note) {
-                is NoteData -> note.staffExplicit
-                is RestData -> note.staffExplicit
-            }
-        }
-        if (hasExplicitStaffTags) {
-            return { note -> note.staff }
-        }
 
         // Only infer a virtual grand staff when the MusicXML attributes actually
         // declare multiple clef/staff contexts. Wide single-staff pitch-range
@@ -409,6 +416,11 @@ object MusicSheetToVF {
             measure.attributes.clefByStaff.keys.any { it > 1 }
         }
         if (!hasMultiStaffClefDeclarations) {
+            return { note -> note.staff }
+        }
+
+        val hasExplicitStaffTags = allNotes.any(::isStaffExplicit)
+        if (hasExplicitStaffTags) {
             return { note -> note.staff }
         }
 
@@ -429,12 +441,17 @@ object MusicSheetToVF {
         return { note ->
             when (note) {
                 is NoteData -> {
-                    // Use a stable two-staff split across the part range to avoid
-                    // per-octave bucket jumps that can split a single measure unexpectedly.
                     if (absoluteStep(note.pitch) <= splitStep) 1 else 2
                 }
                 is RestData -> 1
             }
+        }
+    }
+
+    private fun isStaffExplicit(note: NoteOrRest): Boolean {
+        return when (note) {
+            is NoteData -> note.staffExplicit
+            is RestData -> note.staffExplicit
         }
     }
 

@@ -178,11 +178,86 @@ class MusicSheetToVFTest {
         assertTrue(first.staves[0].stave.keySignature != null)
         assertTrue(first.staves[0].stave.timeSignature != null)
         assertTrue(first.staves[1].stave.clef != null)
+        assertTrue(first.staves[1].stave.keySignature != null)
+        assertTrue(first.staves[1].stave.timeSignature != null)
 
         assertTrue(second.staves[0].stave.clef == null)
         assertTrue(second.staves[0].stave.keySignature == null)
         assertTrue(second.staves[0].stave.timeSignature == null)
         assertTrue(second.staves[1].stave.clef == null)
+        assertTrue(second.staves[1].stave.keySignature == null)
+        assertTrue(second.staves[1].stave.timeSignature == null)
+    }
+
+    @Test
+    fun `missing staff in explicit piano part defaults to treble and leaves bass empty`() {
+        val attrs = MeasureAttributes(
+            divisions = 1,
+            keyFifths = 0,
+            keyMode = "major",
+            timeNumerator = 4,
+            timeDenominator = 4,
+            timeSymbol = "C",
+            clefByStaff = mapOf(1 to "treble", 2 to "bass")
+        )
+
+        val measure0 = Measure(
+            number = 0,
+            attributes = attrs,
+            notes = listOf(
+                NoteData(pitch = Pitch("C", 5), duration = 1, voice = 1, staff = 1, staffExplicit = true),
+                RestData(duration = 1, voice = 2, staff = 2, staffExplicit = true)
+            )
+        )
+        val measure1 = Measure(
+            number = 1,
+            attributes = attrs,
+            notes = listOf(
+                NoteData(pitch = Pitch("A", 4), duration = 4, voice = 1, staff = 1, staffExplicit = true),
+                NoteData(pitch = Pitch("E", 3), duration = 4, voice = 2)
+            )
+        )
+
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure0, measure1))))
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+
+        assertEquals(listOf(1, 2), rendered[0].staves.map { it.staffNumber })
+        assertEquals(listOf(1, 2), rendered[1].staves.map { it.staffNumber })
+        assertTrue(rendered[0].staves.all { it.stave.timeSignature != null })
+
+        val trebleMeasure1 = rendered[1].staves.first { it.staffNumber == 1 }
+        val bassMeasure1 = rendered[1].staves.first { it.staffNumber == 2 }
+
+        assertEquals(2, trebleMeasure1.voices.size)
+        assertTrue(
+            trebleMeasure1.voices.any { voice -> voice.tickables.any { it.keys == listOf("e/3") } }
+        )
+
+        assertTrue(bassMeasure1.voices.isEmpty())
+    }
+
+    @Test
+    fun `declared grand staff keeps both staves even when one staff is empty`() {
+        val attrs = MeasureAttributes(
+            divisions = 1,
+            timeNumerator = 4,
+            timeDenominator = 4,
+            clefByStaff = mapOf(1 to "treble", 2 to "bass")
+        )
+        val measure = Measure(
+            number = 1,
+            attributes = attrs,
+            notes = listOf(
+                NoteData(pitch = Pitch("C", 5), duration = 4, voice = 1, staff = 1, staffExplicit = true)
+            )
+        )
+
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+
+        assertEquals(listOf(1, 2), rendered[0].staves.map { it.staffNumber })
+        val emptyCompanion = rendered[0].staves.first { it.staffNumber == 2 }
+        assertTrue(emptyCompanion.voices.isEmpty())
     }
 
     @Test
@@ -191,9 +266,9 @@ class MusicSheetToVFTest {
             number = 1,
             attributes = MeasureAttributes(divisions = 1, clefByStaff = mapOf(1 to "treble", 2 to "bass")),
             notes = listOf(
-                NoteData(pitch = Pitch("C", 4), duration = 1, voice = 1, staff = 1),
-                NoteData(pitch = Pitch("E", 3), duration = 1, voice = 1, staff = 2, isChordNote = true),
-                NoteData(pitch = Pitch("G", 3), duration = 1, voice = 1, staff = 2)
+                NoteData(pitch = Pitch("C", 4), duration = 1, voice = 1, staff = 1, staffExplicit = true),
+                NoteData(pitch = Pitch("E", 3), duration = 1, voice = 1, staff = 2, staffExplicit = true, isChordNote = true),
+                NoteData(pitch = Pitch("G", 3), duration = 1, voice = 1, staff = 2, staffExplicit = true)
             )
         )
         val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
@@ -269,8 +344,8 @@ class MusicSheetToVFTest {
         val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 420f)
 
         assertEquals(3, rendered.size)
-        assertTrue(rendered[0].staves.first().stave.clef != null)
-        assertTrue(rendered[1].staves.first().stave.clef != null)
-        assertTrue(rendered[2].staves.first().stave.clef != null)
+        assertTrue(rendered[0].staves.any { it.stave.clef != null })
+        assertTrue(rendered[1].staves.any { it.stave.clef != null })
+        assertTrue(rendered[2].staves.any { it.stave.clef != null })
     }
 }

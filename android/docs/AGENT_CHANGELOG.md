@@ -2,6 +2,35 @@
 
 This log records autonomous implementation changes across milestones M0-M20.
 
+## 2026-03-12T06:36:44Z - M10 - Promote 02e Grand-Staff Golden And Lock In Rendering Rules
+- Files:
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/core/VFFormatter.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFBarline.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFLineBreaker.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFSystem.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/model/VFTables.kt,
+  android/NoteWise/app/src/main/java/dev/pola/vexflow/parser/MusicSheetToVF.kt,
+  android/NoteWise/app/src/test/java/dev/pola/vexflow/core/VFFormatterTest.kt,
+  android/NoteWise/app/src/test/java/dev/pola/vexflow/elements/VFLineBreakerTest.kt,
+  android/NoteWise/app/src/test/java/dev/pola/vexflow/elements/VFSystemTest.kt,
+  android/NoteWise/app/src/test/java/dev/pola/vexflow/parser/MusicSheetToVFTest.kt,
+  android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02e_rests_notype_635.png,
+  android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/approval_manifest.json,
+  android/docs/AGENT_PROGRESS.md,
+  android/docs/AGENT_CHANGELOG.md
+- Behavior: Completed the `02e-Rests-NoType.xml` grand-staff conformance pass. The render
+  now preserves explicit empty companion staves, aligns shared timing across treble/bass,
+  shows opening key and time signatures on both staves, keeps the continuous grand-staff
+  barline behavior, enforces 6–19 staff-space vertical separation, reserves left inset for
+  the brace, and draws the brace from Bravura/SMuFL instead of a custom path. The clean
+  `02e` candidate was promoted to the approved 635px golden.
+- Verification:
+  `./gradlew :app:testDebugUnitTest --tests "dev.pola.vexflow.elements.VFSystemTest" --tests "dev.pola.vexflow.elements.VFLineBreakerTest" --tests "dev.pola.vexflow.parser.MusicSheetToVFTest" --tests "dev.pola.vexflow.core.VFFormatterTest" --console=plain` -> SUCCESS
+  `env -u LILYPOND_DEBUG_LAYOUT MUSICXML_SUITE_FIXTURES="02e-Rests-NoType.xml" ./gradlew :app:testDebugUnitTest --tests "dev.pola.notewise.visual.MusicXMLSuiteVisualTest" --rerun-tasks --console=plain` -> SUCCESS
+- Risk: MEDIUM
+- Rollback: Revert the files above and restore the previous `02e_rests_notype_635.png`
+  golden if the promoted grand-staff behavior needs to be withdrawn.
+
 ## 2026-03-10T20:25:00Z - M10 - Share Rendered-Bounds Row Refinement Across Runtime And Visual Harness
 - Files:
   android/NoteWise/app/src/main/java/dev/pola/vexflow/elements/VFRenderedRowSpacingRefiner.kt,

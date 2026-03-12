@@ -55,57 +55,68 @@ class VFBarline(var type: VFBarlineType = VFBarlineType.SINGLE) {
 
     fun draw(ctx: VexRenderingContext) {
         val sv = stave ?: return
+        drawSpan(ctx, sv.getTopLineTopY(), sv.getBottomLineBottomY(), x)
+    }
+
+    fun drawSpan(ctx: VexRenderingContext, topY: Float, bottomY: Float, anchorX: Float = x) {
         when (type) {
             VFBarlineType.NONE -> return
-            VFBarlineType.SINGLE -> drawThin(sv, ctx, x)
+            VFBarlineType.SINGLE -> drawThin(ctx, anchorX, topY, bottomY)
             VFBarlineType.DOUBLE -> {
-                drawThin(sv, ctx, x - thinWidth - 2f)
-                drawThin(sv, ctx, x)
+                drawThin(ctx, anchorX - thinWidth - 2f, topY, bottomY)
+                drawThin(ctx, anchorX, topY, bottomY)
             }
             VFBarlineType.END -> {
-                drawThin(sv, ctx, x - thickWidth - 2f)
-                drawThick(sv, ctx, x)
+                drawThin(ctx, anchorX - thickWidth - 2f, topY, bottomY)
+                drawThick(ctx, anchorX, topY, bottomY)
             }
             VFBarlineType.REPEAT_BEGIN -> {
-                drawThick(sv, ctx, x)
-                drawThin(sv, ctx, x + thickWidth + 2f)
-                drawDots(sv, ctx, x + thickWidth + 2f + dotPad, rightSide = true)
+                drawThick(ctx, anchorX, topY, bottomY)
+                drawThin(ctx, anchorX + thickWidth + 2f, topY, bottomY)
+                drawDots(ctx, anchorX + thickWidth + 2f + dotPad, topY, bottomY, rightSide = true)
             }
             VFBarlineType.REPEAT_END -> {
-                drawDots(sv, ctx, x - dotPad, rightSide = false)
-                drawThin(sv, ctx, x - dotPad - dotRadius * 3f)
-                drawThick(sv, ctx, x)
+                drawDots(ctx, anchorX - dotPad, topY, bottomY, rightSide = false)
+                drawThin(ctx, anchorX - dotPad - dotRadius * 3f, topY, bottomY)
+                drawThick(ctx, anchorX, topY, bottomY)
             }
             VFBarlineType.REPEAT_BOTH -> {
-                drawDots(sv, ctx, x - dotPad, rightSide = false)
-                drawThin(sv, ctx, x - dotPad - dotRadius * 3f)
-                drawThick(sv, ctx, x)
-                drawThin(sv, ctx, x + thickWidth + 2f)
-                drawDots(sv, ctx, x + thickWidth + 2f + dotPad, rightSide = true)
+                drawDots(ctx, anchorX - dotPad, topY, bottomY, rightSide = false)
+                drawThin(ctx, anchorX - dotPad - dotRadius * 3f, topY, bottomY)
+                drawThick(ctx, anchorX, topY, bottomY)
+                drawThin(ctx, anchorX + thickWidth + 2f, topY, bottomY)
+                drawDots(ctx, anchorX + thickWidth + 2f + dotPad, topY, bottomY, rightSide = true)
             }
         }
     }
 
-    private fun drawThin(sv: VFStave, ctx: VexRenderingContext, atX: Float) {
+    private fun drawThin(ctx: VexRenderingContext, atX: Float, topY: Float, bottomY: Float) {
         ctx.lineWidth = thinWidth
         ctx.beginPath()
-        ctx.moveTo(atX, sv.getTopLineTopY())
-        ctx.lineTo(atX, sv.getBottomLineBottomY())
+        ctx.moveTo(atX, topY)
+        ctx.lineTo(atX, bottomY)
         ctx.stroke()
     }
 
-    private fun drawThick(sv: VFStave, ctx: VexRenderingContext, atX: Float) {
+    private fun drawThick(ctx: VexRenderingContext, atX: Float, topY: Float, bottomY: Float) {
         ctx.fillRect(
             atX - thickWidth,
-            sv.getTopLineTopY(),
+            topY,
             thickWidth,
-            sv.getBottomLineBottomY() - sv.getTopLineTopY()
+            bottomY - topY
         )
     }
 
-    private fun drawDots(sv: VFStave, ctx: VexRenderingContext, atX: Float, rightSide: Boolean) {
-        val topDotY = sv.getYForLine(1.5f)
-        val botDotY = sv.getYForLine(2.5f)
+    private fun drawDots(
+        ctx: VexRenderingContext,
+        atX: Float,
+        topY: Float,
+        bottomY: Float,
+        rightSide: Boolean
+    ) {
+        val height = bottomY - topY
+        val topDotY = topY + height * 0.4f
+        val botDotY = topY + height * 0.6f
         val cx = if (rightSide) atX + dotRadius else atX - dotRadius
         for (dotY in listOf(topDotY, botDotY)) {
             ctx.beginPath()

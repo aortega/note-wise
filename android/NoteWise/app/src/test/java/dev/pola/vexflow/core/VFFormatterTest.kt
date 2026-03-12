@@ -253,4 +253,37 @@ class VFFormatterTest {
         val gaps = notes.zipWithNext { prev, curr -> curr.x - prev.x }
         assertTrue(gaps.first() > gaps.last() + 0.5f, "Expected earlier longer-duration gap to be larger: $gaps")
     }
+
+    @Test
+    fun `shared voice groups align grand staff onsets`() {
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val topStave = VFStave(0f, 100f, 300f)
+        val bottomStave = VFStave(0f, 180f, 300f)
+        val topVoice = VFVoice("4/4")
+        val bottomVoice = VFVoice("4/4")
+        val topNotes = listOf(quarterNote("c/5"), quarterNote("d/5"))
+        val bottomNotes = listOf(
+            VFStaveNote(VFStaveNoteStruct(keys = listOf("b/4"), duration = "4r", glyphFontScale = 40f)),
+            quarterNote("e/3")
+        )
+        topVoice.addTickables(topNotes)
+        bottomVoice.addTickables(bottomNotes)
+
+        val sharedStartX = 40f
+        val sharedBarRight = minOf(topStave.x + topStave.width, bottomStave.x + bottomStave.width)
+        val sharedJustify = (sharedBarRight - sharedStartX).coerceAtLeast(0f)
+
+        formatter.formatVoiceGroups(
+            groups = listOf(
+                VFVoiceGroup(stave = topStave, voices = listOf(topVoice)),
+                VFVoiceGroup(stave = bottomStave, voices = listOf(bottomVoice))
+            ),
+            startX = sharedStartX,
+            justifyWidth = sharedJustify,
+            referenceStave = topStave
+        )
+
+        assertEquals(topNotes[0].x, bottomNotes[0].x, 0.01f)
+        assertEquals(topNotes[1].x, bottomNotes[1].x, 0.01f)
+    }
 }

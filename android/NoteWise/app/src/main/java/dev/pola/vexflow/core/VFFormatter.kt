@@ -7,6 +7,11 @@ data class VFFormatterOptions(
     val minWidth: Float = 10f
 )
 
+data class VFVoiceGroup(
+    val stave: VFStave,
+    val voices: List<VFVoice>
+)
+
 /**
  * Assigns x positions to notes by grouping them into beat-aligned tick contexts.
  */
@@ -28,22 +33,45 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
         startX: Float,
         justifyWidth: Float = 0f
     ) {
-        voices.forEach {
-            if (it.getStave() == null) {
-                it.setStave(stave)
+        formatVoiceGroups(
+            groups = listOf(VFVoiceGroup(stave = stave, voices = voices)),
+            startX = startX,
+            justifyWidth = justifyWidth,
+            referenceStave = stave
+        )
+    }
+
+    fun formatVoiceGroups(
+        groups: List<VFVoiceGroup>,
+        startX: Float,
+        justifyWidth: Float = 0f,
+        referenceStave: VFStave? = null
+    ) {
+        val nonEmptyGroups = groups.filter { it.voices.isNotEmpty() }
+        if (nonEmptyGroups.isEmpty()) return
+        val resolvedReferenceStave = referenceStave ?: nonEmptyGroups.firstOrNull()?.stave ?: return
+
+        nonEmptyGroups.forEach { group ->
+            group.voices.forEach { voice ->
+                if (voice.getStave() !== group.stave) {
+                    voice.setStave(group.stave)
+                } else {
+                    voice.preFormat()
+                }
             }
-            it.preFormat()
         }
 
-        val contexts = collectTickContexts(voices)
+        val contexts = collectTickContextsForGroups(nonEmptyGroups)
         contexts.forEach { it.preFormat() }
-        if (applyCenteredFullMeasureRestIfApplicable(contexts, stave, startX)) {
+        if (applyCenteredFullMeasureRestIfApplicable(contexts, resolvedReferenceStave, startX)) {
             return
         }
-        if (applyEqualBeatsGridIfApplicable(contexts, stave, startX, justifyWidth)) {
+        if (applyEqualBeatsGridIfApplicable(contexts, resolvedReferenceStave, startX, justifyWidth)) {
             return
         }
-        assignXPositions(contexts, startX, justifyWidth, stave.spacingBetweenLines, stave)
+        val sharedSpacing = nonEmptyGroups.maxOfOrNull { it.stave.spacingBetweenLines }
+            ?: resolvedReferenceStave.spacingBetweenLines
+        assignXPositions(contexts, startX, justifyWidth, sharedSpacing, resolvedReferenceStave)
     }
 
     private fun applyCenteredFullMeasureRestIfApplicable(
@@ -115,19 +143,40 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
         val contextMap = sortedMapOf<Int, VFTickContext>()
 
         for ((voiceIndex, voice) in voices.withIndex()) {
-            var beatTick = 0
-            val resolution = voice.getResolutionMultiplier()
+            appendVoiceToContextMap(contextMap, voice, voiceIndex)
+        }
 
-            for (note in voice.tickables) {
-                val ctx = contextMap.getOrPut(beatTick) { VFTickContext(beatTick) }
-                ctx.addTickable(note, voiceIndex)
+        return contextMap.values.toList()
+    }
 
-                val durationTicks = (note.duration.doubleValue * resolution).toInt().coerceAtLeast(1)
-                beatTick += durationTicks
+    private fun collectTickContextsForGroups(groups: List<VFVoiceGroup>): List<VFTickContext> {
+        val contextMap = sortedMapOf<Int, VFTickContext>()
+        var voiceIndex = 0
+        groups.forEach { group ->
+            group.voices.forEach { voice ->
+                appendVoiceToContextMap(contextMap, voice, voiceIndex)
+                voiceIndex++
             }
         }
 
         return contextMap.values.toList()
+    }
+
+    private fun appendVoiceToContextMap(
+        contextMap: MutableMap<Int, VFTickContext>,
+        voice: VFVoice,
+        voiceIndex: Int
+    ) {
+        var beatTick = 0
+        val resolution = voice.getResolutionMultiplier()
+
+        for (note in voice.tickables) {
+            val ctx = contextMap.getOrPut(beatTick) { VFTickContext(beatTick) }
+            ctx.addTickable(note, voiceIndex)
+
+            val durationTicks = (note.duration.doubleValue * resolution).toInt().coerceAtLeast(1)
+            beatTick += durationTicks
+        }
     }
 
     private fun assignXPositions(

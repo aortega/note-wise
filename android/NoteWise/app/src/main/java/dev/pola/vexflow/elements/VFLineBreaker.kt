@@ -14,6 +14,8 @@ object VFLineBreaker {
     // Compact 2/4-like opening bars (for example MusicXML testsuite 01b) need a
     // small packing slack so the first row can host one extra bar before compression.
     private const val COMPACT_OPENING_PACKING_SLACK_PX = 12f
+    private const val GRAND_STAFF_MIN_GAP_SPACES = 6f
+    private const val GRAND_STAFF_MAX_GAP_SPACES = 19f
 
     private fun measureRightSafetySpaces(): Float {
         val raw = System.getenv("LILYPOND_MEASURE_RIGHT_SAFETY_SPACES")?.trim().orEmpty()
@@ -24,7 +26,9 @@ object VFLineBreaker {
     private data class StaffContentExtents(
         val topDelta: Float,
         val bottomDelta: Float,
-        val spacing: Float
+        val spacing: Float,
+        val staffTopDelta: Float,
+        val staffBottomDelta: Float
     )
 
     private data class RowContentBounds(
@@ -127,8 +131,15 @@ object VFLineBreaker {
             // no clef on its source stave becomes first in a new row, relayoutRow injects a clef
             // which expands the signature area. naturalWidth must include that extra so the compact
             // row isn't compressed below the actual minimum.
+            val staffNumbersInRow = currentRow
+                .flatMap { measure -> measure.staves.map { staff -> staff.staffNumber } }
+                .distinct()
+                .sorted()
+            val targetStaffYs = computeTargetStaffYs(currentRow, currentY, staffNumbersInRow)
+            val rowStartInset = computeGrandStaffBraceInset(currentRow, targetStaffYs)
             val naturalWidth = currentRow.sumOf { estimateMinWidth(it).toDouble() }.toFloat() +
-                computeClefInjectionExtra(currentRow)
+                computeClefInjectionExtra(currentRow) +
+                rowStartInset
             // Fill-ratio rule: if the last row is ≥67% full, expand it to match the other rows
             // so the score looks justified. Below that threshold the row is sparse, and stretching
             // would spread notes too far apart, so we use the natural compact width instead.
@@ -187,34 +198,32 @@ object VFLineBreaker {
         return runCatching { clef.widthForStaffSpacing(spacing) + spacing }.getOrElse { 0f }
     }
 
+    private fun computeGrandStaffBraceInset(
+        row: List<MusicSheetToVF.RenderedMeasure>,
+        targetStaffYs: Map<Int, Float>? = null
+    ): Float {
+        val firstMeasure = row.firstOrNull() ?: return 0f
+        if (firstMeasure.staves.size <= 1) return 0f
+        val orderedStaves = firstMeasure.staves.sortedBy { it.staffNumber }
+        val topStave = orderedStaves.first().stave
+        val bottomStave = orderedStaves.last().stave
+        val topY = targetStaffYs?.get(orderedStaves.first().staffNumber) ?: topStave.y
+        val bottomY = targetStaffYs?.get(orderedStaves.last().staffNumber) ?: bottomStave.y
+        val topLineTopY = topY - (topStave.lineThickness / 2f)
+        val bottomLineBottomY = bottomY +
+            ((bottomStave.numLines - 1) * bottomStave.spacingBetweenLines) +
+            (bottomStave.lineThickness / 2f)
+        val spanHeightPx = bottomLineBottomY - topLineTopY
+        val spacing = maxOf(topStave.spacingBetweenLines, bottomStave.spacingBetweenLines)
+        return VFSystem.grandStaffBraceReservedInsetPx(spanHeightPx, spacing)
+    }
+
     private fun relayoutRow(
         row: List<MusicSheetToVF.RenderedMeasure>,
         startX: Float,
         y: Float,
         systemWidth: Float
     ): List<MusicSheetToVF.RenderedMeasure> {
-        // If the first measure in this row will receive an injected clef (its source stave has
-        // none), add the clef width to its minimum budget so notes don't overflow the barline.
-        val clefInjectionExtra = computeClefInjectionExtra(row)
-        val minWidths = row.mapIndexed { index, measure ->
-            estimateMinWidth(measure) + if (index == 0) clefInjectionExtra else 0f
-        }
-        val minWidthSum = minWidths.sum()
-        val weights = row.map { estimateWeight(it) }
-        val weightSum = weights.sum().coerceAtLeast(1f)
-        val extraSpace = (systemWidth - minWidthSum).coerceAtLeast(0f)
-
-        val allocatedWidths: List<Float> = if (minWidthSum <= systemWidth) {
-            // Normal expansion path: distribute remaining width by rhythmic weight.
-            minWidths.mapIndexed { index, base ->
-                base + extraSpace * (weights[index] / weightSum)
-            }
-        } else {
-            // Compression path: fit the row exactly into available width.
-            // For row 1 (measure 1...), keep bar 1 at minimum width and compress bars 2..n.
-            allocateCompressedWidths(row, minWidths, systemWidth)
-        }
-
         val rowTopY = row.minOfOrNull { it.topY() } ?: y
         val staffNumbersInRow = row
             .flatMap { measure -> measure.staves.map { staff -> staff.staffNumber } }
@@ -222,7 +231,31 @@ object VFLineBreaker {
             .sorted()
         val targetStaffYs = computeTargetStaffYs(row, y, staffNumbersInRow)
 
-        var cursor = startX
+        // If the first measure in this row will receive an injected clef (its source stave has
+        // none), add the clef width to its minimum budget so notes don't overflow the barline.
+        val clefInjectionExtra = computeClefInjectionExtra(row)
+        val rowStartInset = computeGrandStaffBraceInset(row, targetStaffYs)
+        val usableMeasureWidth = (systemWidth - rowStartInset).coerceAtLeast(0f)
+        val minWidths = row.mapIndexed { index, measure ->
+            estimateMinWidth(measure) + if (index == 0) clefInjectionExtra else 0f
+        }
+        val minWidthSum = minWidths.sum()
+        val weights = row.map { estimateWeight(it) }
+        val weightSum = weights.sum().coerceAtLeast(1f)
+        val extraSpace = (usableMeasureWidth - minWidthSum).coerceAtLeast(0f)
+
+        val allocatedWidths: List<Float> = if (minWidthSum <= usableMeasureWidth) {
+            // Normal expansion path: distribute remaining width by rhythmic weight.
+            minWidths.mapIndexed { index, base ->
+                base + extraSpace * (weights[index] / weightSum)
+            }
+        } else {
+            // Compression path: fit the row exactly into available width.
+            // For row 1 (measure 1...), keep bar 1 at minimum width and compress bars 2..n.
+            allocateCompressedWidths(row, minWidths, usableMeasureWidth)
+        }
+
+        var cursor = startX + rowStartInset
         return row.mapIndexed { index, measure ->
             val rawWidth = allocatedWidths[index]
             val fallbackWidth = (systemWidth / row.size.coerceAtLeast(1)).coerceAtLeast(56f)
@@ -269,12 +302,20 @@ object VFLineBreaker {
                 measureStaffs[staffNumber]?.let { estimateStaffContentExtents(it) }
             }
             if (extents.isEmpty()) {
-                StaffContentExtents(topDelta = 0f, bottomDelta = 40f, spacing = 10f)
+                StaffContentExtents(
+                    topDelta = -0.5f,
+                    bottomDelta = 40.5f,
+                    spacing = 10f,
+                    staffTopDelta = -0.5f,
+                    staffBottomDelta = 40.5f
+                )
             } else {
                 StaffContentExtents(
                     topDelta = extents.minOf { it.topDelta },
                     bottomDelta = extents.maxOf { it.bottomDelta },
-                    spacing = extents.maxOf { it.spacing }
+                    spacing = extents.maxOf { it.spacing },
+                    staffTopDelta = extents.minOf { it.staffTopDelta },
+                    staffBottomDelta = extents.maxOf { it.staffBottomDelta }
                 )
             }
         }
@@ -285,13 +326,19 @@ object VFLineBreaker {
         // from the canvas top (rowStartY), regardless of content extents above the staff lines.
         // Content (clefs, high notes) may extend above rowStartY and will be clipped at y=0.
         ys[0] = rowStartY
-        // Rule 2: each subsequent staff's content top is exactly 2 × staffSpacing below
-        //         the previous staff's content bottom.
+        // Rule 2: adjacent grand-staff boundaries keep at least 6 staff-spaces between
+        //         stave lines, expanding to accommodate inward ledger overflow up to 19 spaces.
         for (index in 1 until staffNumbersInRow.size) {
             val prev = extentsByStaff[index - 1]
             val curr = extentsByStaff[index]
-            val gap = 2f * maxOf(prev.spacing, curr.spacing)
-            ys[index] = ys[index - 1] + prev.bottomDelta - curr.topDelta + gap
+            val spacing = maxOf(prev.spacing, curr.spacing)
+            val minGap = GRAND_STAFF_MIN_GAP_SPACES * spacing
+            val maxGap = GRAND_STAFF_MAX_GAP_SPACES * spacing
+            val prevInnerOverflow = (prev.bottomDelta - prev.staffBottomDelta).coerceAtLeast(0f)
+            val currInnerOverflow = (curr.staffTopDelta - curr.topDelta).coerceAtLeast(0f)
+            val requiredGap = prevInnerOverflow + currInnerOverflow + (2f * spacing)
+            val gap = maxOf(minGap, requiredGap).coerceAtMost(maxGap)
+            ys[index] = ys[index - 1] + prev.staffBottomDelta - curr.staffTopDelta + gap
         }
 
         return staffNumbersInRow.zip(ys).toMap()
@@ -340,6 +387,10 @@ object VFLineBreaker {
         isFirstRowStart: Boolean
     ): Float {
         var width = estimateMinWidth(measure)
+
+        if (isRowStart) {
+            width += computeGrandStaffBraceInset(listOf(measure))
+        }
 
         // When a row starts with a bar that originally had no clef, relayoutRow injects one.
         // Include this here too so packing decisions match actual rendered row widths.
@@ -576,7 +627,9 @@ object VFLineBreaker {
         return StaffContentExtents(
             topDelta = top - stave.y,
             bottomDelta = bottom - stave.y,
-            spacing = spacing
+            spacing = spacing,
+            staffTopDelta = stave.getTopLineTopY() - stave.y,
+            staffBottomDelta = stave.getBottomLineBottomY() - stave.y
         )
     }
 

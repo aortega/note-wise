@@ -5,6 +5,16 @@ package dev.pola.vexflow.model
  */
 object VFTables {
 
+    const val GLYPH_BRACE: Int = 0xE000
+    const val GLYPH_REVERSED_BRACE: Int = 0xE001
+    const val GLYPH_BRACKET: Int = 0xE002
+    const val GLYPH_BRACKET_TOP: Int = 0xE003
+    const val GLYPH_BRACKET_BOTTOM: Int = 0xE004
+    const val GLYPH_BRACE_SMALL: Int = 0xF400
+    const val GLYPH_BRACE_LARGE: Int = 0xF401
+    const val GLYPH_BRACE_LARGER: Int = 0xF402
+    const val GLYPH_BRACE_FLAT: Int = 0xF403
+
     const val GLYPH_G_CLEF: Int = 0xE050
     const val GLYPH_F_CLEF: Int = 0xE062
     const val GLYPH_C_CLEF: Int = 0xE05C

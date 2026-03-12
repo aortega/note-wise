@@ -76,7 +76,84 @@ class VFLineBreakerTest {
     }
 
     @Test
-    fun `consecutive staves keep minimum 2x spacing between content`() {
+    fun `consecutive staves keep minimum 6x spacing between stave boundaries`() {
+        val measure = buildGrandStaffMeasure(
+            upperKey = "c/5",
+            lowerKey = "c/3"
+        )
+
+        val layout = VFLineBreaker.layout(
+            measures = listOf(measure),
+            systemWidth = 600f,
+            startX = 20f,
+            startY = 50f,
+            systemSpacing = 40f
+        )
+
+        val staves = layout.rows.first().first().staves.sortedBy { it.stave.y }
+        val upper = staves[0]
+        val lower = staves[1]
+        val gap = lower.stave.getTopLineTopY() - upper.stave.getBottomLineBottomY()
+
+        assertTrue(gap >= 6f * upper.stave.spacingBetweenLines)
+    }
+
+    @Test
+    fun `moderate inward ledger content keeps total grand staff gap at 6 spaces`() {
+        val measure = buildGrandStaffMeasure(
+            upperKey = "e/3",
+            lowerKey = "c/3"
+        )
+
+        val layout = VFLineBreaker.layout(
+            measures = listOf(measure),
+            systemWidth = 600f,
+            startX = 20f,
+            startY = 50f,
+            systemSpacing = 40f
+        )
+
+        val staves = layout.rows.first().first().staves.sortedBy { it.stave.y }
+        val upper = staves[0]
+        val lower = staves[1]
+        val gap = lower.stave.getTopLineTopY() - upper.stave.getBottomLineBottomY()
+
+        assertEquals(6f * upper.stave.spacingBetweenLines, gap, 1.0f)
+    }
+
+    @Test
+    fun `grand staff rows reserve left inset for brace`() {
+        val measure = buildGrandStaffMeasure(
+            upperKey = "c/5",
+            lowerKey = "c/3"
+        )
+        val startX = 20f
+        val systemWidth = 600f
+
+        val layout = VFLineBreaker.layout(
+            measures = listOf(measure),
+            systemWidth = systemWidth,
+            startX = startX,
+            startY = 50f,
+            systemSpacing = 40f
+        )
+
+        val row = layout.rows.first()
+        val firstMeasure = row.first()
+        val orderedStaves = firstMeasure.staves.sortedBy { it.staffNumber }
+        val firstStave = orderedStaves.first().stave
+        val lastStave = orderedStaves.last().stave
+        val expectedInset = VFSystem.grandStaffBraceReservedInsetPx(firstStave, lastStave)
+        val rowRight = row.maxOf { rendered ->
+            rendered.staves.maxOf { it.stave.x + it.stave.width }
+        }
+
+        assertEquals(startX + expectedInset, firstStave.x, 0.01f)
+        assertTrue(rowRight <= startX + systemWidth + 0.01f)
+    }
+
+    @Test
+    fun `consecutive staves cap expansion at 19x spacing when ledger lines intrude`() {
         val measure = buildGrandStaffMeasureForOverlap()
 
         val layout = VFLineBreaker.layout(
@@ -92,7 +169,8 @@ class VFLineBreakerTest {
         val lower = staves[1]
         val gap = (lower.stave.getTopLineTopY() - upper.stave.getBottomLineBottomY())
 
-        assertTrue(gap >= 2f * upper.stave.spacingBetweenLines)
+        assertTrue(gap >= 6f * upper.stave.spacingBetweenLines)
+        assertTrue(gap <= 19f * maxOf(upper.stave.spacingBetweenLines, lower.stave.spacingBetweenLines) + 0.01f)
     }
 
     @Test
@@ -116,7 +194,7 @@ class VFLineBreakerTest {
         val upper = firstStaves.first { it.staffNumber == 1 }
         val lower = firstStaves.first { it.staffNumber == 2 }
         val gap = lower.stave.getTopLineTopY() - upper.stave.getBottomLineBottomY()
-        assertTrue(gap >= 2f * maxOf(upper.stave.spacingBetweenLines, lower.stave.spacingBetweenLines))
+        assertTrue(gap >= 6f * maxOf(upper.stave.spacingBetweenLines, lower.stave.spacingBetweenLines))
     }
 
     @Test
@@ -181,11 +259,18 @@ class VFLineBreakerTest {
     }
 
     private fun buildGrandStaffMeasureForOverlap(): MusicSheetToVF.RenderedMeasure {
+        return buildGrandStaffMeasure(upperKey = "c/2", lowerKey = "c/6")
+    }
+
+    private fun buildGrandStaffMeasure(
+        upperKey: String,
+        lowerKey: String
+    ): MusicSheetToVF.RenderedMeasure {
         val upperVoice = VFVoice("4/4")
         upperVoice.addTickable(
             VFStaveNote(
                 VFStaveNoteStruct(
-                    keys = listOf("c/2"),
+                    keys = listOf(upperKey),
                     duration = "4",
                     glyphFontScale = 40f
                 )
@@ -196,7 +281,7 @@ class VFLineBreakerTest {
         lowerVoice.addTickable(
             VFStaveNote(
                 VFStaveNoteStruct(
-                    keys = listOf("c/6"),
+                    keys = listOf(lowerKey),
                     duration = "4",
                     glyphFontScale = 40f
                 )

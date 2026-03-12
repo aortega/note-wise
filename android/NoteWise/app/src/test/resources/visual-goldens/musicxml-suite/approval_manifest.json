@@ -122,11 +122,11 @@
     "status": "approved",
     "reference_size": [
       635,
-      157
+      96
     ],
     "approved_golden": "android/NoteWise/app/src/test/resources/visual-goldens/musicxml-suite/02d_rests_multimeasure_timesignatures_635.png",
     "last_candidate": null,
-    "note": "Phase 1: alphaTab golden (635x157, padding=[7,0,7,0])",
+    "note": "Phase 1: NoteWise golden (635x96, padding=[7,0,7,0]) cropped to required staff-content height.",
     "updated_at": "2026-03-09T03:51:55+00:00"
   },
   "02e-Rests-NoType.xml": {

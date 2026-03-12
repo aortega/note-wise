@@ -12,6 +12,7 @@ import dev.pola.vexflow.elements.VFStaveOptions
 import dev.pola.vexflow.elements.VFTimeSignature
 import dev.pola.vexflow.elements.VFTie
 import dev.pola.vexflow.elements.VFTieNotes
+import dev.pola.vexflow.elements.VFMultiMeasureRest
 import dev.pola.vexflow.model.VFMetrics
 import dev.pola.vexflow.model.VFStaveNote
 import dev.pola.vexflow.model.VFStaveNoteStruct
@@ -32,7 +33,8 @@ object MusicSheetToVF {
         val stave: VFStave,
         val voices: List<VFVoice>,
         val beams: List<VFBeam>,
-        val ties: List<VFTie>
+        val ties: List<VFTie>,
+        val multiMeasureRest: VFMultiMeasureRest? = null
     )
 
     data class RenderedMeasure(
@@ -99,26 +101,34 @@ object MusicSheetToVF {
         val seenVirtualStaffs = mutableSetOf<Int>()
         var previousMeasureStaffNumbers: Set<Int> = emptySet()
 
-        return part.measures.mapIndexed { index, measure ->
+        val result = mutableListOf<RenderedMeasure>()
+        var visualIndex = 0
+        var skipRemaining = 0
+
+        for (measure in part.measures) {
+            if (skipRemaining > 0) {
+                skipRemaining--
+                continue
+            }
             val attrs = measure.attributes
             val measureStaffNumbers = measure.notes.map(staffResolver).distinct().ifEmpty { listOf(1) }
             val firstAppearanceStaffs = measureStaffNumbers.filter { it !in seenVirtualStaffs }.toSet()
             val segmentStartStaffs = measureStaffNumbers.filter { it !in previousMeasureStaffNumbers }.toSet()
             seenVirtualStaffs.addAll(measureStaffNumbers)
             val showKeySigForMeasure =
-                index == 0 || previousAttributes?.let {
+                visualIndex == 0 || previousAttributes?.let {
                     it.keyFifths != attrs.keyFifths || it.keyMode != attrs.keyMode
                 } ?: true
             val showTimeSigForMeasure =
-                index == 0 || previousAttributes?.let {
+                visualIndex == 0 || previousAttributes?.let {
                     it.timeNumerator != attrs.timeNumerator ||
                         it.timeDenominator != attrs.timeDenominator ||
                         it.timeSymbol != attrs.timeSymbol
                 } ?: true
 
-            convertMeasure(
+            result += convertMeasure(
                 measure = measure,
-                x = startX + index * staveWidth,
+                x = startX + visualIndex * staveWidth,
                 y = startY,
                 width = staveWidth,
                 showClef = showClef,
@@ -131,12 +141,17 @@ object MusicSheetToVF {
                 firstAppearanceStaffs = firstAppearanceStaffs,
                 segmentStartStaffs = segmentStartStaffs,
                 inferVirtualClefs = !hasExplicitStaffTags
-            )
-                .also {
-                    previousAttributes = attrs
-                    previousMeasureStaffNumbers = measureStaffNumbers.toSet()
-                }
+            ).also {
+                previousAttributes = attrs
+                previousMeasureStaffNumbers = measureStaffNumbers.toSet()
+            }
+
+            if (attrs.multipleRestCount > 1) {
+                skipRemaining = attrs.multipleRestCount - 1
+            }
+            visualIndex++
         }
+        return result
     }
 
     private fun convertMeasure(
@@ -159,6 +174,7 @@ object MusicSheetToVF {
 
         val staffNumbers = measure.notes.map(staffResolver).distinct().sorted().ifEmpty { listOf(1) }
         val chordGroups = buildChordGroups(measure.notes)
+        val measureDurationDivisions = measureDurationInDivisions(attrs)
 
         val renderedStaves = staffNumbers.mapIndexed { staffIndex, staffNumber ->
             val clefForStaff = resolvedClefForStaff(
@@ -213,12 +229,17 @@ object MusicSheetToVF {
                 val beamRun = mutableListOf<VFStaveNote>()
 
                 for (group in groups) {
+                    val measureRestCount = (group.primary as? RestData)
+                        ?.takeIf { isFullMeasureRest(it, groups.size, measureDurationDivisions) }
+                        ?.let { 1 }
+
                     val vfNote = buildVFNote(
                         group = group,
                         divisions = attrs.divisions,
                         keyFifths = attrs.keyFifths,
                         staffLineSpacingPx = staffLineSpacingPx,
-                        staffResolver = staffResolver
+                        staffResolver = staffResolver,
+                        measureRestCount = measureRestCount
                     )
                     vfNotes.add(vfNote)
 
@@ -275,7 +296,10 @@ object MusicSheetToVF {
                 stave = stave,
                 voices = voices,
                 beams = beams,
-                ties = ties
+                ties = ties,
+                multiMeasureRest = if (attrs.multipleRestCount > 1) {
+                    VFMultiMeasureRest(count = attrs.multipleRestCount, staffLineSpacingPx = staffLineSpacingPx)
+                } else null
             )
         }
 
@@ -458,7 +482,8 @@ object MusicSheetToVF {
         divisions: Int,
         keyFifths: Int,
         staffLineSpacingPx: Float,
-        staffResolver: (NoteOrRest) -> Int
+        staffResolver: (NoteOrRest) -> Int,
+        measureRestCount: Int? = null
     ): VFStaveNote {
         val primary = group.primary
         val duration = durationToVF(primary.duration, divisions) + if (primary is RestData) "r" else ""
@@ -472,7 +497,13 @@ object MusicSheetToVF {
         }
 
         val keys = when (primary) {
-            is RestData -> listOf("b/4")
+            is RestData -> {
+                val explicitRestKey = primary.displayStep?.let { step ->
+                    primary.displayOctave?.let { octave -> "${step.lowercase()}/$octave" }
+                }
+                val defaultRestKey = if (measureRestCount != null) "d/5" else "b/4"
+                listOf(explicitRestKey ?: defaultRestKey)
+            }
             is NoteData -> {
                 keyedNotes.map { pitchToKey(it.pitch, it.accidental, keyFifths) }
             }
@@ -496,9 +527,27 @@ object MusicSheetToVF {
                 keys = keys,
                 duration = duration,
                 glyphFontScale = staffLineSpacingPx * SMUFL_EM_IN_STAFF_SPACES,
-                accidentalDisplayOptions = accidentalDisplayOptions
+                accidentalDisplayOptions = accidentalDisplayOptions,
+                measureRestCount = measureRestCount
             )
         )
+    }
+
+    private fun isFullMeasureRest(
+        rest: RestData,
+        groupsInVoice: Int,
+        measureDurationDivisions: Int
+    ): Boolean {
+        if (rest.measureRest == true) return true
+        if (groupsInVoice != 1) return false
+        if (measureDurationDivisions <= 0) return false
+        return rest.duration == measureDurationDivisions
+    }
+
+    private fun measureDurationInDivisions(attrs: MeasureAttributes): Int {
+        val denominator = attrs.timeDenominator.toLong().coerceAtLeast(1L)
+        val numerator = attrs.divisions.toLong() * 4L * attrs.timeNumerator.toLong()
+        return ((numerator + (denominator / 2L)) / denominator).toInt().coerceAtLeast(1)
     }
 
     fun pitchToKey(pitch: Pitch, explicitAccidental: String?, keyFifths: Int): String {
@@ -546,18 +595,35 @@ object MusicSheetToVF {
 
     fun durationToVF(divisionDuration: Int, divisions: Int): String {
         val quarterUnits = divisionDuration.toDouble() / divisions.toDouble().coerceAtLeast(1.0)
-        return when {
-            quarterUnits >= 4.0 -> "1"
-            quarterUnits >= 3.0 -> "2d"
-            quarterUnits >= 2.0 -> "2"
-            quarterUnits >= 1.5 -> "4d"
-            quarterUnits >= 1.0 -> "4"
-            quarterUnits >= 0.75 -> "8d"
-            quarterUnits >= 0.5 -> "8"
-            quarterUnits >= 0.375 -> "16d"
-            quarterUnits >= 0.25 -> "16"
-            else -> "32"
+        val candidates = listOf(
+            "1" to 4.0,
+            "2d" to 3.0,
+            "2" to 2.0,
+            "4d" to 1.5,
+            "4" to 1.0,
+            "8d" to 0.75,
+            "8" to 0.5,
+            "16d" to 0.375,
+            "16" to 0.25,
+            "32d" to 0.1875,
+            "32" to 0.125,
+            "64d" to 0.09375,
+            "64" to 0.0625,
+            "128d" to 0.046875,
+            "128" to 0.03125,
+            "256d" to 0.0234375,
+            "256" to 0.015625,
+            "512d" to 0.01171875,
+            "512" to 0.0078125,
+            "1024d" to 0.005859375,
+            "1024" to 0.00390625
+        )
+
+        if (quarterUnits <= candidates.last().second) {
+            return "1024"
         }
+
+        return candidates.minByOrNull { (_, value) -> kotlin.math.abs(value - quarterUnits) }?.first ?: "1024"
     }
 
     fun fifthsToKeySpec(fifths: Int, mode: String): String {

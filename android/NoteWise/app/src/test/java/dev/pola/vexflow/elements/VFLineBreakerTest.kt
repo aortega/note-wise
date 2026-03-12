@@ -119,6 +119,33 @@ class VFLineBreakerTest {
         assertTrue(gap >= 2f * maxOf(upper.stave.spacingBetweenLines, lower.stave.spacingBetweenLines))
     }
 
+    @Test
+    fun `multi measure rest count contributes to row content bounds`() {
+        val first = buildMeasure(noteCount = 4).copy(measureNumber = 1)
+        val secondWithoutMmr = buildEmptyMeasure(measureNumber = 2, includeMultiMeasureRest = false)
+        val secondWithMmr = buildEmptyMeasure(measureNumber = 2, includeMultiMeasureRest = true)
+
+        fun secondRowHeight(second: MusicSheetToVF.RenderedMeasure): Float {
+            val layout = VFLineBreaker.layout(
+                measures = listOf(first, second),
+                systemWidth = 150f,
+                startX = 20f,
+                startY = 60f,
+                systemSpacing = 0f
+            )
+            assertTrue("Expected wrapping into two rows", layout.rows.size >= 2)
+            return layout.systemHeights[1]
+        }
+
+        val withoutMmrHeight = secondRowHeight(secondWithoutMmr)
+        val withMmrHeight = secondRowHeight(secondWithMmr)
+
+        assertTrue(
+            "MMR count should expand row content bounds (without=$withoutMmrHeight, with=$withMmrHeight)",
+            withMmrHeight > withoutMmrHeight + 0.01f
+        )
+    }
+
     private fun buildMeasure(noteCount: Int): MusicSheetToVF.RenderedMeasure {
         val voice = VFVoice("4/4")
         val notes = List(noteCount.coerceAtLeast(1)) {
@@ -197,6 +224,36 @@ class VFLineBreakerTest {
                     voices = listOf(lowerVoice),
                     beams = emptyList(),
                     ties = emptyList()
+                )
+            )
+        )
+    }
+
+    private fun buildEmptyMeasure(
+        measureNumber: Int,
+        includeMultiMeasureRest: Boolean
+    ): MusicSheetToVF.RenderedMeasure {
+        val stave = VFStave(
+            x = 0f,
+            y = 60f,
+            width = 500f
+        )
+
+        return MusicSheetToVF.RenderedMeasure(
+            measureNumber = measureNumber,
+            staves = listOf(
+                MusicSheetToVF.RenderedStaff(
+                    staffNumber = 1,
+                    resolvedClefType = "treble",
+                    stave = stave,
+                    voices = emptyList(),
+                    beams = emptyList(),
+                    ties = emptyList(),
+                    multiMeasureRest = if (includeMultiMeasureRest) {
+                        VFMultiMeasureRest(count = 2, staffLineSpacingPx = stave.spacingBetweenLines)
+                    } else {
+                        null
+                    }
                 )
             )
         )

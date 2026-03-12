@@ -31,7 +31,8 @@ data class MeasureAttributes(
     val timeNumerator: Int = 4,
     val timeDenominator: Int = 4,
     val timeSymbol: String = "",
-    val clefByStaff: Map<Int, String> = mapOf(1 to "treble")
+    val clefByStaff: Map<Int, String> = mapOf(1 to "treble"),
+    val multipleRestCount: Int = 0
 )
 
 fun MeasureAttributes.clefForStaff(staff: Int): String {
@@ -70,7 +71,10 @@ data class RestData(
     override val voice: Int = 1,
     override val staff: Int = 1,
     val staffExplicit: Boolean = false,
-    override val isChordNote: Boolean = false
+    override val isChordNote: Boolean = false,
+    val measureRest: Boolean? = null,
+    val displayStep: String? = null,
+    val displayOctave: Int? = null
 ) : NoteOrRest()
 
 data class Pitch(

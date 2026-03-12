@@ -395,6 +395,12 @@ object VisualRenderHarness {
                     }
                 }
 
+                renderedStaff.multiMeasureRest?.let { multiRest ->
+                    val (restTop, restBottom) = multiRest.verticalBounds(stave)
+                    staffTop = minOf(staffTop, restTop)
+                    staffBottom = maxOf(staffBottom, restBottom)
+                }
+
                 top = minOf(top, staffTop)
                 bottom = maxOf(bottom, staffBottom)
             }

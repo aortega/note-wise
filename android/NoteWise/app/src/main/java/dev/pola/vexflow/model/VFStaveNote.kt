@@ -1,16 +1,19 @@
 package dev.pola.vexflow.model
 
+import android.graphics.RectF
 import dev.pola.vexflow.core.VFTickContext
 import dev.pola.vexflow.core.VexRenderingContext
 import dev.pola.vexflow.elements.VFAccidental
 import dev.pola.vexflow.elements.VFStave
+import kotlin.math.ceil
 
 data class VFStaveNoteStruct(
     val keys: List<String>,
     val duration: String,
     val glyphFontScale: Float = 40f,
     val stemDirection: Int = STEM_AUTO,
-    val accidentalDisplayOptions: List<VFAccidental.DisplayOptions?> = emptyList()
+    val accidentalDisplayOptions: List<VFAccidental.DisplayOptions?> = emptyList(),
+    val measureRestCount: Int? = null
 ) {
     companion object {
         const val STEM_AUTO = 0
@@ -42,6 +45,7 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
         ?: error("Unknown duration string: '${struct.duration}'")
     val glyphFontScale: Float = struct.glyphFontScale
     val isRest: Boolean = struct.duration.contains('r')
+    val measureRestCount: Int? = struct.measureRestCount
 
     var x: Float = 0f
     var noteLineIndex: Int = 0
@@ -64,10 +68,12 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
     fun getMetrics(): VFTickableMetrics {
         val headWidth = glyphFontScale * 0.65f
         val accidentalSpan = accidentalSpanPx()
+        val spacing = stave?.spacingBetweenLines ?: (glyphFontScale / 4f)
+        val dottedExtraRight = if (isDottedDuration()) dottedRightExtraPx(spacing) else 0f
         return VFTickableMetrics(
             width = headWidth,
             totalLeftPx = (headWidth / 2f) + accidentalSpan,
-            totalRightPx = headWidth / 2f
+            totalRightPx = (headWidth / 2f) + dottedExtraRight
         )
     }
 
@@ -135,12 +141,18 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
         duration >= VFFraction.of(1, 4) -> VFTables.GLYPH_REST_QUARTER
         duration >= VFFraction.of(1, 8) -> VFTables.GLYPH_REST_8TH
         duration >= VFFraction.of(1, 16) -> VFTables.GLYPH_REST_16TH
-        else -> VFTables.GLYPH_REST_32ND
+        duration >= VFFraction.of(1, 32) -> VFTables.GLYPH_REST_32ND
+        duration >= VFFraction.of(1, 64) -> VFTables.GLYPH_REST_64TH
+        duration >= VFFraction.of(1, 128) -> VFTables.GLYPH_REST_128TH
+        duration >= VFFraction.of(1, 256) -> VFTables.GLYPH_REST_256TH
+        duration >= VFFraction.of(1, 512) -> VFTables.GLYPH_REST_512TH
+        else -> VFTables.GLYPH_REST_1024TH
     }
 
     private fun drawNoteheads(ctx: VexRenderingContext, sv: VFStave) {
         val glyph = noteheadGlyph()
         val headWidth = getMetrics().width
+        val dotted = isDottedDuration()
         for (key in keys) {
             val noteLine = pitchToNoteLineIndex(key, sv)
             val placement = noteheadPlacement(key, sv)
@@ -151,6 +163,13 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
             } else {
                 ctx.drawSmuflGlyph(glyph, x - headWidth / 2f, noteCenterY, glyphFontScale)
             }
+
+            if (dotted) {
+                val rightEdge = placement?.let { it.originX + it.bbox.northeast.x } ?: (x + headWidth / 2f)
+                val dotY = sv.getYForNote(dottedDotLine(noteLine))
+                drawAugmentationDot(ctx, rightEdge, dotY, sv.spacingBetweenLines)
+            }
+
             if (shouldDrawDebugGlyphLabels()) {
                 drawDebugLabel(
                     ctx = ctx,
@@ -164,12 +183,41 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
     }
 
     private fun drawRest(ctx: VexRenderingContext, sv: VFStave) {
-        val restY = when {
-            duration >= VFFraction.of(1, 1) -> sv.getYForLine(1f)
-            duration >= VFFraction.of(1, 2) -> sv.getYForLine(1f)
-            else -> sv.getYForLine(2f)
+        val glyph = restGlyph()
+        val glyphBounds = runCatching { ctx.measureSmuflGlyphBounds(glyph, glyphFontScale) }.getOrNull()
+        val drawX = centeredGlyphOriginX(glyphBounds)
+        val rightEdge = glyphBounds?.let { drawX + it.right } ?: (x + (glyphFontScale * 0.65f) / 2f)
+        val dotted = isDottedDuration()
+        val restKey = keys.firstOrNull()?.takeIf { it.contains('/') } ?: "b/4"
+        val restLine = pitchToNoteLineIndex(restKey, sv)
+        var restOriginY: Float? = null
+
+        if (measureRestCount != null && duration >= VFFraction.of(1, 1)) {
+            val hangLineY = sv.getYForMusicLine(4)
+            val hangingOriginY = hangingRestOriginY(glyphBounds, hangLineY)
+            restOriginY = hangingOriginY
+            ctx.drawSmuflGlyph(glyph, drawX, hangingOriginY, glyphFontScale)
+        } else {
+            val restY = sv.getYForNote(restLine)
+            restOriginY = restY
+            ctx.drawSmuflGlyph(glyph, drawX, restY, glyphFontScale)
         }
-        ctx.drawSmuflGlyph(restGlyph(), x, restY, glyphFontScale)
+
+        if (dotted) {
+            val dotY = restOriginY?.let {
+                restAugmentationDotY(
+                    sv = sv,
+                    restOriginY = it,
+                    restGlyphBounds = glyphBounds,
+                    fallbackRestLine = restLine
+                )
+            } ?: sv.getYForNote(dottedDotLine(restLine))
+            drawAugmentationDot(ctx, rightEdge, dotY, sv.spacingBetweenLines)
+        }
+
+        measureRestCount?.takeIf { it > 0 }?.let { count ->
+            drawMeasureRestCount(ctx, sv, count)
+        }
     }
 
     private fun drawStem(ctx: VexRenderingContext, sv: VFStave) {
@@ -416,6 +464,119 @@ class VFStaveNote(private val struct: VFStaveNoteStruct) {
         VFAccidental.AccidentalType.HALF_SHARP -> "#h"
         VFAccidental.AccidentalType.THREE_QUARTER_FLAT -> "db"
         VFAccidental.AccidentalType.THREE_QUARTER_SHARP -> "#t"
+    }
+
+    private fun drawMeasureRestCount(ctx: VexRenderingContext, sv: VFStave, count: Int) {
+        val digits = count.toString().mapNotNull { digitGlyph(it) }
+        if (digits.isEmpty()) return
+
+        val spacing = sv.spacingBetweenLines
+        val targetBottomY = sv.getYForLine(0f) - spacing * 0.5f
+        val advances = digits.map { digitAdvance(ctx, it, spacing) }
+        val totalAdvance = advances.sum()
+
+        var cursorX = x - totalAdvance / 2f
+        for ((index, digit) in digits.withIndex()) {
+            val bounds = runCatching { ctx.measureSmuflGlyphBounds(digit, glyphFontScale) }.getOrNull()
+            val left = bounds?.left ?: 0f
+            val bottom = bounds?.bottom ?: 0f
+            val originX = cursorX - left
+            val originY = targetBottomY - bottom
+            ctx.drawSmuflGlyph(digit, originX, originY, glyphFontScale)
+            cursorX += advances[index]
+        }
+    }
+
+    private fun digitAdvance(ctx: VexRenderingContext, codepoint: Int, spacing: Float): Float {
+        val bounds = runCatching { ctx.measureSmuflGlyphBounds(codepoint, glyphFontScale) }.getOrNull()
+        return bounds?.let { (it.right - it.left).coerceAtLeast(spacing * 0.6f) } ?: (spacing * 0.6f)
+    }
+
+    private fun digitGlyph(char: Char): Int? = when (char) {
+        '0' -> VFTables.GLYPH_TIME_SIG_0
+        '1' -> VFTables.GLYPH_TIME_SIG_1
+        '2' -> VFTables.GLYPH_TIME_SIG_2
+        '3' -> VFTables.GLYPH_TIME_SIG_3
+        '4' -> VFTables.GLYPH_TIME_SIG_4
+        '5' -> VFTables.GLYPH_TIME_SIG_5
+        '6' -> VFTables.GLYPH_TIME_SIG_6
+        '7' -> VFTables.GLYPH_TIME_SIG_7
+        '8' -> VFTables.GLYPH_TIME_SIG_8
+        '9' -> VFTables.GLYPH_TIME_SIG_9
+        else -> null
+    }
+
+    private fun centeredGlyphOriginX(bounds: RectF?): Float {
+        val centerOffset = bounds?.let { (it.left + it.right) / 2f } ?: 0f
+        return x - centerOffset
+    }
+
+    private fun hangingRestOriginY(bounds: RectF?, hangLineY: Float): Float {
+        return bounds?.let { hangLineY - it.top - 1f } ?: (hangLineY - 1f)
+    }
+
+    private fun drawAugmentationDot(
+        ctx: VexRenderingContext,
+        rightEdgeX: Float,
+        centerY: Float,
+        spacing: Float
+    ) {
+        val dotGlyph = VFTables.GLYPH_AUGMENTATION_DOT
+        val bounds = runCatching { ctx.measureSmuflGlyphBounds(dotGlyph, glyphFontScale) }.getOrNull()
+        val gap = spacing * 0.35f
+        val fallbackDotWidth = spacing * 0.5f
+        val dotWidth = bounds?.let { (it.right - it.left).coerceAtLeast(fallbackDotWidth) } ?: fallbackDotWidth
+
+        val centerOffsetX = bounds?.let { (it.left + it.right) / 2f } ?: 0f
+        val centerOffsetY = bounds?.let { (it.top + it.bottom) / 2f } ?: 0f
+
+        val targetCenterX = rightEdgeX + gap + (dotWidth / 2f)
+        val originX = targetCenterX - centerOffsetX
+        val originY = centerY - centerOffsetY
+
+        ctx.drawSmuflGlyph(dotGlyph, originX, originY, glyphFontScale)
+    }
+
+    private fun isDottedDuration(): Boolean {
+        val token = durationString.trim()
+        val core = if (token.endsWith("r")) token.dropLast(1) else token
+        return core.endsWith("d")
+    }
+
+    private fun dottedDotLine(noteLine: Int): Int {
+        return if (noteLine % 2 == 0) noteLine - 1 else noteLine
+    }
+
+    private fun restAugmentationDotY(
+        sv: VFStave,
+        restOriginY: Float,
+        restGlyphBounds: RectF?,
+        fallbackRestLine: Int
+    ): Float {
+        if (restGlyphBounds == null) {
+            return sv.getYForNote(dottedDotLine(fallbackRestLine))
+        }
+
+        val halfSpace = sv.spacingBetweenLines / 2f
+        if (halfSpace <= 0f) {
+            return sv.getYForNote(dottedDotLine(fallbackRestLine))
+        }
+
+        val restTopY = restOriginY + restGlyphBounds.top
+        val topNoteLine = (restTopY - sv.y) / halfSpace
+        val dotSpaceLine = firstSpaceAtOrBelow(topNoteLine)
+        return sv.getYForNote(dotSpaceLine)
+    }
+
+    private fun firstSpaceAtOrBelow(noteLine: Float): Int {
+        val ceilLine = ceil(noteLine).toInt()
+        return if (ceilLine % 2 != 0) ceilLine else (ceilLine + 1)
+    }
+
+    private fun dottedRightExtraPx(spacing: Float): Float {
+        val gap = spacing * 0.35f
+        val dotWidth = spacing * 0.5f
+        return gap + dotWidth
     }
 
     private fun shouldDrawDebugGlyphLabels(): Boolean {

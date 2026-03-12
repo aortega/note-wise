@@ -59,6 +59,27 @@ class MusicXMLParserTest {
     }
 
     @Test
+    fun `rest display step and octave are parsed`() {
+        val xml = """<measure number='1'>
+<attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign></clef></attributes>
+<note><rest><display-step>E</display-step><display-octave>4</display-octave></rest><duration>1</duration><voice>1</voice></note>
+</measure>"""
+        val rest = xmlSheet(xml).parts[0].measures[0].notes[0] as RestData
+        assertEquals("E", rest.displayStep)
+        assertEquals(4, rest.displayOctave)
+    }
+
+    @Test
+    fun `rest measure no attribute is parsed`() {
+        val xml = """<measure number='1'>
+<attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>3</beats><beat-type>2</beat-type></time><clef><sign>G</sign></clef></attributes>
+<note><rest measure='no'/><duration>6</duration><voice>1</voice></note>
+</measure>"""
+        val rest = xmlSheet(xml).parts[0].measures[0].notes[0] as RestData
+        assertEquals(false, rest.measureRest)
+    }
+
+    @Test
     fun `sharp accidental is parsed`() {
         val xml = """<measure number='1'>
 <attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign></clef></attributes>
@@ -77,6 +98,33 @@ class MusicXMLParserTest {
         assertEquals("major", attrs.keyMode)
     }
 
+        @Test
+        fun `multiple rest is measure scoped and does not carry forward`() {
+                val xml = """
+<measure number='1'>
+    <attributes>
+        <divisions>1</divisions>
+        <key><fifths>0</fifths></key>
+        <time><beats>2</beats><beat-type>2</beat-type></time>
+        <clef><sign>G</sign></clef>
+        <measure-style><multiple-rest>2</multiple-rest></measure-style>
+    </attributes>
+    <note><rest/><duration>2</duration><voice>1</voice><type>whole</type></note>
+</measure>
+<measure number='2'>
+    <note><rest/><duration>2</duration><voice>1</voice><type>whole</type></note>
+</measure>
+<measure number='3'>
+    <note><rest/><duration>2</duration><voice>1</voice><type>whole</type></note>
+</measure>
+""".trimIndent()
+
+                val measures = xmlSheet(xml).parts[0].measures
+                assertEquals(2, measures[0].attributes.multipleRestCount)
+                assertEquals(0, measures[1].attributes.multipleRestCount)
+                assertEquals(0, measures[2].attributes.multipleRestCount)
+        }
+
     @Test
     fun `MusicSheetToVF durationToVF quarter note`() {
         assertEquals("4", MusicSheetToVF.durationToVF(1, 1))
@@ -86,6 +134,16 @@ class MusicXMLParserTest {
     @Test
     fun `MusicSheetToVF durationToVF dotted quarter`() {
         assertEquals("4d", MusicSheetToVF.durationToVF(6, 4))
+    }
+
+    @Test
+    fun `MusicSheetToVF durationToVF supports very short rests`() {
+        assertEquals("64", MusicSheetToVF.durationToVF(32, 512))
+        assertEquals("128", MusicSheetToVF.durationToVF(16, 512))
+        assertEquals("256", MusicSheetToVF.durationToVF(8, 512))
+        assertEquals("512", MusicSheetToVF.durationToVF(4, 512))
+        assertEquals("1024", MusicSheetToVF.durationToVF(2, 512))
+        assertEquals("1024d", MusicSheetToVF.durationToVF(3, 512))
     }
 
     @Test

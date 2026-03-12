@@ -115,7 +115,7 @@ class MusicXMLParser {
         number: Int,
         previousAttributes: MeasureAttributes
     ): Pair<Measure, MeasureAttributes> {
-        var attributes = previousAttributes
+        var attributes = previousAttributes.copy(multipleRestCount = 0)
         val notes = mutableListOf<NoteOrRest>()
         val tempoMarks = mutableListOf<TempoMark>()
         var barlineLeft = "regular"
@@ -156,6 +156,7 @@ class MusicXMLParser {
         var timeDenominator = previous.timeDenominator
         var timeSymbol = previous.timeSymbol
         val clefByStaff = previous.clefByStaff.toMutableMap()
+        var multipleRestCount = 0
 
         var event = parser.next()
         while (!(event == XmlPullParser.END_TAG && parser.name == "attributes")) {
@@ -180,6 +181,15 @@ class MusicXMLParser {
                         val parsedClef = parseClef(parser)
                         clefByStaff[number] = parsedClef
                     }
+                    "measure-style" -> {
+                        var msEvent = parser.next()
+                        while (!(msEvent == XmlPullParser.END_TAG && parser.name == "measure-style")) {
+                            if (msEvent == XmlPullParser.START_TAG && parser.name == "multiple-rest") {
+                                multipleRestCount = parser.nextText().trim().toIntOrNull() ?: 0
+                            }
+                            msEvent = parser.next()
+                        }
+                    }
                 }
             }
             event = parser.next()
@@ -197,7 +207,8 @@ class MusicXMLParser {
             timeNumerator = timeNumerator,
             timeDenominator = timeDenominator,
             timeSymbol = timeSymbol,
-            clefByStaff = clefByStaff
+            clefByStaff = clefByStaff,
+            multipleRestCount = multipleRestCount
         )
     }
 
@@ -238,6 +249,9 @@ class MusicXMLParser {
         var accidentalEditorial = false
         var accidentalParenthesized = false
         var accidentalBracketed = false
+        var restMeasure: Boolean? = null
+        var restDisplayStep: String? = null
+        var restDisplayOctave: Int? = null
 
         var event = parser.next()
         while (!(event == XmlPullParser.END_TAG && parser.name == "note")) {
@@ -245,6 +259,8 @@ class MusicXMLParser {
                 when (parser.name) {
                     "step" -> step = parser.nextText().trim()
                     "octave" -> octave = parser.nextText().trim().toIntOrNull() ?: 4
+                    "display-step" -> restDisplayStep = parser.nextText().trim().uppercase().ifEmpty { null }
+                    "display-octave" -> restDisplayOctave = parser.nextText().trim().toIntOrNull()
                     "alter" -> alter = parser.nextText().trim().toFloatOrNull() ?: 0f
                     "duration" -> duration = parser.nextText().trim().toIntOrNull() ?: 1
                     "voice" -> voice = parser.nextText().trim().toIntOrNull() ?: 1
@@ -252,7 +268,10 @@ class MusicXMLParser {
                         staff = parser.nextText().trim().toIntOrNull() ?: 1
                         staffExplicit = true
                     }
-                    "rest" -> isRest = true
+                    "rest" -> {
+                        isRest = true
+                        restMeasure = parseYesNo(parser.getAttributeValue(null, "measure"))
+                    }
                     "chord" -> isChord = true
                     "tie" -> {
                         when (parser.getAttributeValue(null, "type")) {
@@ -317,7 +336,10 @@ class MusicXMLParser {
                 voice = voice,
                 staff = staff,
                 staffExplicit = staffExplicit,
-                isChordNote = isChord
+                isChordNote = isChord,
+                measureRest = restMeasure,
+                displayStep = restDisplayStep,
+                displayOctave = restDisplayOctave
             )
         } else {
             NoteData(

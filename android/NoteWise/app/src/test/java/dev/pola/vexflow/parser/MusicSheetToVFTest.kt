@@ -42,6 +42,76 @@ class MusicSheetToVFTest {
         assertEquals(4, staff.voices[0].tickables.size)
         assertEquals("4", staff.voices[0].tickables[0].durationString)
         assertEquals("4r", staff.voices[0].tickables[2].durationString)
+        assertEquals(listOf("b/4"), staff.voices[0].tickables[2].keys)
+    }
+
+    @Test
+    fun `pitched rest uses explicit display position key`() {
+        val measure = Measure(
+            number = 1,
+            attributes = MeasureAttributes(divisions = 1),
+            notes = listOf(RestData(duration = 1, voice = 1, displayStep = "E", displayOctave = 4))
+        )
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
+
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+        val rest = rendered[0].staves.first().voices[0].tickables[0]
+
+        assertEquals(listOf("e/4"), rest.keys)
+    }
+
+    @Test
+    fun `full measure rest uses line four default and shows count one`() {
+        val measure = Measure(
+            number = 1,
+            attributes = MeasureAttributes(divisions = 512, timeNumerator = 2, timeDenominator = 2),
+            notes = listOf(RestData(duration = 2048, voice = 1))
+        )
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
+
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+        val rest = rendered[0].staves.first().voices[0].tickables[0]
+
+        assertEquals(listOf("d/5"), rest.keys)
+        assertEquals(1, rest.measureRestCount)
+    }
+
+    @Test
+    fun `measure no full rest still uses full measure engraving when duration fills bar`() {
+        val measure = Measure(
+            number = 1,
+            attributes = MeasureAttributes(divisions = 512, timeNumerator = 3, timeDenominator = 2),
+            notes = listOf(RestData(duration = 3072, voice = 1, measureRest = false))
+        )
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
+
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+        val rest = rendered[0].staves.first().voices[0].tickables[0]
+
+        assertEquals(listOf("d/5"), rest.keys)
+        assertEquals(1, rest.measureRestCount)
+    }
+
+    @Test
+    fun `tiny rest durations keep increasing speed tokens`() {
+        val measure = Measure(
+            number = 1,
+            attributes = MeasureAttributes(divisions = 512, timeNumerator = 2, timeDenominator = 2),
+            notes = listOf(
+                RestData(duration = 32, voice = 1),
+                RestData(duration = 16, voice = 1),
+                RestData(duration = 8, voice = 1),
+                RestData(duration = 4, voice = 1),
+                RestData(duration = 2, voice = 1),
+                RestData(duration = 2, voice = 1)
+            )
+        )
+        val sheet = MusicSheet(parts = listOf(Part(id = "P1", measures = listOf(measure))))
+
+        val rendered = MusicSheetToVF.convert(sheet, startX = 0f, startY = 0f, staveWidth = 300f)
+        val durations = rendered[0].staves.first().voices[0].tickables.map { it.durationString }
+
+        assertEquals(listOf("64r", "128r", "256r", "512r", "1024r", "1024r"), durations)
     }
 
     @Test

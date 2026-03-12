@@ -162,4 +162,95 @@ class VFFormatterTest {
         // Second note should be at the midpoint of the available region
         assertTrue(notes[1].x > notes[0].x)
     }
+
+    @Test
+    fun `equal beat grid prevents overlap for dense contexts`() {
+        val stave = VFStave(0f, 100f, 120f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("4/4").apply { setStave(stave) }
+        val notes = List(11) {
+            VFStaveNote(VFStaveNoteStruct(keys = listOf("b/4"), duration = "32r", glyphFontScale = 40f))
+        }
+        voice.addTickables(notes)
+
+        formatter.formatVoices(listOf(voice), stave, startX = 10f, justifyWidth = 100f)
+
+        for (i in 1 until notes.size) {
+            val prev = notes[i - 1]
+            val curr = notes[i]
+            val prevMetrics = prev.getMetrics()
+            val currMetrics = curr.getMetrics()
+            val gap = curr.x - prev.x
+            val required = prevMetrics.totalRightPx + currMetrics.totalLeftPx
+            assertTrue(gap >= required - 0.01f, "Context $i overlap: gap=$gap required=$required")
+        }
+    }
+
+    @Test
+    fun `full measure rest is centered in note area`() {
+        val stave = VFStave(0f, 100f, 300f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("2/2").apply { setStave(stave) }
+        val rest = VFStaveNote(
+            VFStaveNoteStruct(
+                keys = listOf("g/4"),
+                duration = "1r",
+                glyphFontScale = 40f,
+                measureRestCount = 1
+            )
+        )
+        voice.addTickable(rest)
+
+        val startX = stave.getNoteStartX()
+        val justifyWidth = (stave.width - (startX - stave.x)).coerceAtLeast(0f)
+        formatter.formatVoices(listOf(voice), stave, startX = startX, justifyWidth = justifyWidth)
+
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val noteAreaEnd = stave.x + stave.width - rightSafety
+        val expectedCenterX = (startX + noteAreaEnd) / 2f
+        assertEquals(expectedCenterX, rest.x, 0.01f)
+    }
+
+    @Test
+    fun `dense rest only contexts stay within note area`() {
+        val stave = VFStave(0f, 100f, 300f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("2/2").apply { setStave(stave) }
+        val durations = listOf("2r", "4r", "8r", "16r", "32r", "64r", "128r", "256r", "512r", "1024r", "1024r")
+        val notes = durations.map { duration ->
+            VFStaveNote(VFStaveNoteStruct(keys = listOf("b/4"), duration = duration, glyphFontScale = 40f))
+        }
+        voice.addTickables(notes)
+
+        val startX = stave.getNoteStartX()
+        val justifyWidth = (stave.width - (startX - stave.x)).coerceAtLeast(0f)
+        formatter.formatVoices(listOf(voice), stave, startX = startX, justifyWidth = justifyWidth)
+
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val noteAreaEnd = stave.x + stave.width - rightSafety
+        notes.forEachIndexed { index, note ->
+            val m = note.getMetrics()
+            assertTrue(note.x - m.totalLeftPx >= startX - 0.01f, "Rest $index left overflow")
+            assertTrue(note.x + m.totalRightPx <= noteAreaEnd + 0.01f, "Rest $index right overflow")
+        }
+    }
+
+    @Test
+    fun `rest only compression keeps duration weighted spacing`() {
+        val stave = VFStave(0f, 100f, 220f)
+        val formatter = VFFormatter(VFFormatterOptions(minWidth = 10f))
+        val voice = VFVoice("2/2").apply { setStave(stave) }
+        val durations = listOf("2r", "4r", "8r", "16r", "32r", "64r", "128r", "256r")
+        val notes = durations.map { duration ->
+            VFStaveNote(VFStaveNoteStruct(keys = listOf("b/4"), duration = duration, glyphFontScale = 40f))
+        }
+        voice.addTickables(notes)
+
+        val startX = stave.getNoteStartX()
+        val justifyWidth = (stave.width - (startX - stave.x)).coerceAtLeast(0f)
+        formatter.formatVoices(listOf(voice), stave, startX = startX, justifyWidth = justifyWidth)
+
+        val gaps = notes.zipWithNext { prev, curr -> curr.x - prev.x }
+        assertTrue(gaps.first() > gaps.last() + 0.5f, "Expected earlier longer-duration gap to be larger: $gaps")
+    }
 }

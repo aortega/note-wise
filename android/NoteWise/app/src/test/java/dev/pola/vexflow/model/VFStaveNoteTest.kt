@@ -27,6 +27,7 @@ class VFStaveNoteTest {
         assertTrue(n.isRest)
     }
 
+
     @Test
     fun `whole note is not beamed and has no flag`() {
         val n = note(listOf("c/4"), "1")
@@ -153,5 +154,13 @@ class VFStaveNoteTest {
         decorated.setStave(stave)
 
         assertTrue(decorated.getMetrics().totalLeftPx > plain.getMetrics().totalLeftPx)
+    }
+
+    @Test
+    fun `dotted duration reserves extra right spacing`() {
+        val plain = note(listOf("c/4"), "4")
+        val dotted = note(listOf("c/4"), "4d")
+
+        assertTrue(dotted.getMetrics().totalRightPx > plain.getMetrics().totalRightPx)
     }
 }

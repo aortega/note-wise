@@ -14,6 +14,8 @@ import dev.pola.vexflow.parser.MusicSheetToVF
  */
 object VFRenderedRowSpacingRefiner {
 
+    private const val MIN_TOP_PADDING_PX = 6f
+
     data class StaffGlyphBounds(
         val staffNumber: Int,
         val left: Float,
@@ -93,9 +95,39 @@ object VFRenderedRowSpacingRefiner {
                 }
             }
 
-            refinedStates
+            normalizeTopPadding(refinedStates)
         } finally {
             probeBitmap.recycle()
+        }
+    }
+
+    private fun normalizeTopPadding(rows: List<RefinedRow>): List<RefinedRow> {
+        if (rows.isEmpty()) return rows
+
+        val minGlyphTop = rows
+            .flatMap { it.glyphBounds }
+            .minOfOrNull { it.top }
+
+        val minStaffTop = rows
+            .flatMap { it.measures }
+            .flatMap { it.staves }
+            .minOfOrNull { it.stave.getTopLineTopY() }
+
+        val minObservedTop = when {
+            minGlyphTop != null && minStaffTop != null -> minOf(minGlyphTop, minStaffTop)
+            minGlyphTop != null -> minGlyphTop
+            minStaffTop != null -> minStaffTop
+            else -> MIN_TOP_PADDING_PX
+        }
+
+        val deltaY = (MIN_TOP_PADDING_PX - minObservedTop).coerceAtLeast(0f)
+        if (deltaY <= 0f) return rows
+
+        return rows.map { row ->
+            RefinedRow(
+                measures = shiftRowByDelta(row.measures, deltaY),
+                glyphBounds = row.glyphBounds.map { it.shifted(deltaY) }
+            )
         }
     }
 

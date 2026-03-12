@@ -26,8 +26,10 @@ data class VFFraction(val numerator: Int, val denominator: Int) : Comparable<VFF
 
         /** Parse a VexFlow duration string into a VFFraction. Returns null on unknown input. */
         fun fromDurationString(duration: String): VFFraction? {
-            val base = duration.trimEnd('r', 'd')
-            val dotted = duration.endsWith("d")
+            val token = duration.trim()
+            val core = if (token.endsWith("r")) token.dropLast(1) else token
+            val dotted = core.endsWith("d")
+            val base = if (dotted) core.dropLast(1) else core
             val frac = when (base) {
                 "w", "1" -> of(1, 1)
                 "h", "2" -> of(1, 2)
@@ -35,6 +37,11 @@ data class VFFraction(val numerator: Int, val denominator: Int) : Comparable<VFF
                 "8" -> of(1, 8)
                 "16" -> of(1, 16)
                 "32" -> of(1, 32)
+                "64" -> of(1, 64)
+                "128" -> of(1, 128)
+                "256" -> of(1, 256)
+                "512" -> of(1, 512)
+                "1024" -> of(1, 1024)
                 else -> return null
             }
             return if (dotted) frac + frac * of(1, 2) else frac

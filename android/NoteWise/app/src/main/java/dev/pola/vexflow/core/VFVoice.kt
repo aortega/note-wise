@@ -39,7 +39,7 @@ class VFVoice(timeSpec: String = "4/4") {
     fun getTotalTicks(): VFFraction =
         tickables.fold(VFFraction.ZERO) { acc, note -> acc + note.duration }
 
-    fun getResolutionMultiplier(): Int = 32
+    fun getResolutionMultiplier(): Int = 4096
 
     fun preFormat() {
         val sv = stave ?: return

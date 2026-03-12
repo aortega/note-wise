@@ -561,6 +561,13 @@ object VFLineBreaker {
             }
         }
 
+        staffRender.multiMeasureRest?.let { multiRest ->
+            val (restTop, restBottom) = multiRest.verticalBounds(stave)
+            top = minOf(top, restTop)
+            bottom = maxOf(bottom, restBottom)
+            sawGlyphExtent = true
+        }
+
         if (!sawGlyphExtent || top == Float.MAX_VALUE || bottom == Float.MIN_VALUE) {
             top = stave.getTopLineTopY()
             bottom = stave.getBottomLineBottomY()

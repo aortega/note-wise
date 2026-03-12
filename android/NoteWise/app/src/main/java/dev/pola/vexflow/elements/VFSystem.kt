@@ -37,7 +37,9 @@ class VFSystem(
                 stave.draw(ctx)
                 var drewNotesForStaff = false
 
-                if (staffRender.voices.isNotEmpty()) {
+                if (staffRender.multiMeasureRest != null) {
+                    staffRender.multiMeasureRest.draw(stave, ctx)
+                } else if (staffRender.voices.isNotEmpty()) {
                     val startX = stave.getNoteStartX()
                     val justify = (stave.width - (startX - stave.x)).coerceAtLeast(0f)
                     formatter.formatVoices(

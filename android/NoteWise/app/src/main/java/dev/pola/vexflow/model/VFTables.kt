@@ -38,6 +38,11 @@ object VFTables {
     const val GLYPH_REST_8TH: Int = 0xE4E6
     const val GLYPH_REST_16TH: Int = 0xE4E7
     const val GLYPH_REST_32ND: Int = 0xE4E8
+    const val GLYPH_REST_64TH: Int = 0xE4E9
+    const val GLYPH_REST_128TH: Int = 0xE4EA
+    const val GLYPH_REST_256TH: Int = 0xE4EB
+    const val GLYPH_REST_512TH: Int = 0xE4EC
+    const val GLYPH_REST_1024TH: Int = 0xE4ED
 
     const val GLYPH_FLAG_8TH_UP: Int = 0xE240
     const val GLYPH_FLAG_8TH_DOWN: Int = 0xE241

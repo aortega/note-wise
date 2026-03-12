@@ -37,10 +37,30 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
 
         val contexts = collectTickContexts(voices)
         contexts.forEach { it.preFormat() }
+        if (applyCenteredFullMeasureRestIfApplicable(contexts, stave, startX)) {
+            return
+        }
         if (applyEqualBeatsGridIfApplicable(contexts, stave, startX, justifyWidth)) {
             return
         }
-        assignXPositions(contexts, startX, justifyWidth, stave.spacingBetweenLines)
+        assignXPositions(contexts, startX, justifyWidth, stave.spacingBetweenLines, stave)
+    }
+
+    private fun applyCenteredFullMeasureRestIfApplicable(
+        contexts: List<VFTickContext>,
+        stave: VFStave,
+        startX: Float
+    ): Boolean {
+        if (contexts.size != 1) return false
+        val only = contexts.first()
+        val tickables = only.getTickables()
+        if (tickables.isEmpty()) return false
+        if (!tickables.all { it.measureRestCount != null }) return false
+
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val noteAreaEnd = (stave.x + stave.width - rightSafety).coerceAtLeast(startX)
+        only.x = (startX + noteAreaEnd) / 2f
+        return true
     }
 
     /**
@@ -75,6 +95,8 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
             ctx.x = referenceLeft + onTimeX
             onTimeX += springWidth
         }
+
+        enforceMinimumContextSpacing(ordered, minGap = 0f)
         return true
     }
 
@@ -100,7 +122,7 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
                 val ctx = contextMap.getOrPut(beatTick) { VFTickContext(beatTick) }
                 ctx.addTickable(note, voiceIndex)
 
-                val durationTicks = (note.duration.doubleValue * resolution).toInt()
+                val durationTicks = (note.duration.doubleValue * resolution).toInt().coerceAtLeast(1)
                 beatTick += durationTicks
             }
         }
@@ -112,7 +134,8 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
         contexts: List<VFTickContext>,
         startX: Float,
         justifyWidth: Float,
-        staffSpacing: Float
+        staffSpacing: Float,
+        stave: VFStave
     ) {
         if (contexts.isEmpty()) return
 
@@ -132,7 +155,88 @@ class VFFormatter(private val options: VFFormatterOptions = VFFormatterOptions()
             cumWeight += ctx.getMaxDuration().doubleValue
         }
 
-        val minGap = options.minWidth
+        val minGap = if (contexts.all { ctx -> ctx.getTickables().all { it.isRest } }) 0f else options.minWidth
+        enforceMinimumContextSpacing(contexts, minGap)
+        fitRestOnlyContextsWithinMeasure(contexts, stave, startX)
+    }
+
+    private fun fitRestOnlyContextsWithinMeasure(
+        contexts: List<VFTickContext>,
+        stave: VFStave,
+        startX: Float
+    ) {
+        if (contexts.isEmpty()) return
+        if (!contexts.all { ctx -> ctx.getTickables().all { it.isRest } }) return
+
+        val ordered = contexts.sortedBy { it.tickID }
+        val rightSafety = (stave.endBarline?.leftExtentPx() ?: 0f) + 2f
+        val noteAreaStart = startX
+        val noteAreaEnd = (stave.x + stave.width - rightSafety).coerceAtLeast(noteAreaStart)
+        if (noteAreaEnd <= noteAreaStart) return
+
+        val currentLeft = ordered.minOf { it.x - it.leftPx }
+        val currentRight = ordered.maxOf { it.x + it.rightPx }
+        if (currentLeft >= noteAreaStart && currentRight <= noteAreaEnd) return
+
+        val packedXs = FloatArray(ordered.size)
+        packedXs[0] = noteAreaStart + ordered.first().leftPx
+
+        val minRequiredGaps = FloatArray((ordered.size - 1).coerceAtLeast(0))
+        for (i in 0 until ordered.lastIndex) {
+            minRequiredGaps[i] = ordered[i].rightPx + ordered[i + 1].leftPx
+            packedXs[i + 1] = packedXs[i] + minRequiredGaps[i]
+        }
+
+        val packedRight = packedXs.last() + ordered.last().rightPx
+        if (packedRight >= noteAreaEnd) {
+            ordered.forEachIndexed { index, ctx -> ctx.x = packedXs[index] }
+            return
+        }
+
+        val shiftToPackedStart = packedXs.first() - ordered.first().x
+        val desiredExtraGaps = FloatArray((ordered.size - 1).coerceAtLeast(0))
+        var totalDesiredExtra = 0f
+        for (i in 0 until ordered.lastIndex) {
+            val shiftedCurrent = ordered[i].x + shiftToPackedStart
+            val shiftedNext = ordered[i + 1].x + shiftToPackedStart
+            val rhythmicGap = shiftedNext - shiftedCurrent
+            val extra = (rhythmicGap - minRequiredGaps[i]).coerceAtLeast(0f)
+            desiredExtraGaps[i] = extra
+            totalDesiredExtra += extra
+        }
+
+        if (totalDesiredExtra <= 0f) {
+            ordered.forEachIndexed { index, ctx -> ctx.x = packedXs[index] }
+            return
+        }
+
+        val availableExtra = (noteAreaEnd - packedRight).coerceAtLeast(0f)
+        val compression = (availableExtra / totalDesiredExtra).coerceIn(0f, 1f)
+
+        var currentX = packedXs.first()
+        ordered.first().x = currentX
+        for (i in 1 until ordered.size) {
+            currentX += minRequiredGaps[i - 1] + desiredExtraGaps[i - 1] * compression
+            ordered[i].x = currentX
+        }
+
+        val finalRight = ordered.last().x + ordered.last().rightPx
+        if (finalRight > noteAreaEnd) {
+            val overflow = finalRight - noteAreaEnd
+            ordered.forEach { it.x -= overflow }
+        }
+
+        val finalLeft = ordered.first().x - ordered.first().leftPx
+        if (finalLeft < noteAreaStart) {
+            val underflow = noteAreaStart - finalLeft
+            ordered.forEach { it.x += underflow }
+        }
+    }
+
+    private fun enforceMinimumContextSpacing(
+        contexts: List<VFTickContext>,
+        minGap: Float = options.minWidth
+    ) {
         for (i in 1 until contexts.size) {
             val prev = contexts[i - 1]
             val curr = contexts[i]
